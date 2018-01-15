@@ -28,9 +28,21 @@ var app Application
 // Initialize - start and boostrap application pieces like database, cache, etc.
 func (a *Application) Initialize(c config.ApplicationConfiguration) {
 	var err error
-	connection := fmt.Sprintf("user=%s password=%s dbname=%s", c.DBUser, c.DBPass, c.DBName)
+	var connection string
+
+	if c.DBPass == "" {
+		connection = fmt.Sprintf("dbname=%s", c.DBName)
+	} else {
+		connection = fmt.Sprintf("user=%s password=%s dbname=%s", c.DBUser, c.DBPass, c.DBName)
+	}
 
 	a.DB, err = sql.Open("postgres", connection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer a.DB.Close()
+
+	err = a.DB.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
