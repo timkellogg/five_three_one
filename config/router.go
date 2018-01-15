@@ -4,10 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/timkellogg/five_three_one/app/middlewares"
-
 	"github.com/gorilla/mux"
 	"github.com/timkellogg/five_three_one/app/controllers"
+	"github.com/timkellogg/five_three_one/app/middlewares"
 )
 
 // Route - application endpoint accessible through public http methods
