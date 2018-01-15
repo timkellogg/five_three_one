@@ -1,0 +1,46 @@
+build:
+  desc: compile application into binary
+  cmds:
+    - go build
+
+clean:
+  desc: remove application binary
+  cmds:
+    - rm five_three_one
+
+setup_db:
+  desc: creates and migrates database
+  cmds:
+    - createdb five_three_one_development
+    - createdb five_three_one_test
+    - task migrate_up
+
+drop_db:
+  desc: drops database
+  cmds:
+    - dropdb five_three_one_development
+    - dropdb five_three_one_test
+
+migrate_test_db:
+  desc: setup test db
+  cmds:
+    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_test?sslmode=disable up
+
+migrate_down:
+  desc: migrate down
+  cmds:
+    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_development?sslmode=disable down
+    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_test?sslmode=disable down
+
+migrate_up:
+  desc: migrate up
+  cmds:
+    - migrate -path ./migrations  -database postgres://localhost:5432/five_three_one_development?sslmode=disable up
+    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_test?sslmode=disable up
+
+serve:
+  desc: builds the application and execs binary
+  deps: [build]
+  cmds:
+    - ./five_three_one
+
