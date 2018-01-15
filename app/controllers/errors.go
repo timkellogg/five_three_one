@@ -10,5 +10,5 @@ import (
 // Errors404 - Not found handler
 func Errors404(w http.ResponseWriter, r *http.Request) {
 	err := errors.New("Resource Not Found")
-	handleError(err, models.ResourceNotFound, w)
+	handleError(err, models.ResourceNotFoundError, w)
 }

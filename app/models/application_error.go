@@ -18,15 +18,15 @@ var JSONParseError = ApplicationError{
 	HTTPStatus: http.StatusInternalServerError,
 }
 
-// ResourceNotFound - could not find resource
-var ResourceNotFound = ApplicationError{
+// ResourceNotFoundError - could not find resource
+var ResourceNotFoundError = ApplicationError{
 	Code:       "ResourceNotFound",
 	Message:    "There is no resource at that location",
 	HTTPStatus: http.StatusNotFound,
 }
 
-// NotImplemented - endpoint is not finished yet
-var NotImplemented = ApplicationError{
+// NotImplementedError - endpoint is not finished yet
+var NotImplementedError = ApplicationError{
 	Code:       "ResourceNotImplemented",
 	Message:    "Endpoint is not implemented yet",
 	HTTPStatus: http.StatusNotImplemented,

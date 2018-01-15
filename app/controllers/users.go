@@ -8,5 +8,5 @@ import (
 
 // UsersCreate - create an application user
 func UsersCreate(w http.ResponseWriter, r *http.Request) {
-	handleError(nil, models.NotImplemented, w)
+	handleError(nil, models.NotImplementedError, w)
 }
