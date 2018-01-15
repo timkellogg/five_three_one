@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"net/http"
+
+	"github.com/timkellogg/five_three_one/app/models"
 )
 
+// UsersCreate - create an application user
 func UsersCreate(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-	w.Write([]byte("Not Implemented"))
+	handleError(nil, models.NotImplemented, w)
 }

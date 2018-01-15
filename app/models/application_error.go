@@ -24,3 +24,10 @@ var ResourceNotFound = ApplicationError{
 	Message:    "There is no resource at that location",
 	HTTPStatus: http.StatusNotFound,
 }
+
+// NotImplemented - endpoint is not finished yet
+var NotImplemented = ApplicationError{
+	Code:       "ResourceNotImplemented",
+	Message:    "Endpoint is not implemented yet",
+	HTTPStatus: http.StatusNotImplemented,
+}
