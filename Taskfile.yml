@@ -44,3 +44,7 @@ serve:
   cmds:
     - ./five_three_one
 
+start:
+  desc: autoreloads application
+  cmds:
+    - fresh
