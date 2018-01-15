@@ -17,3 +17,10 @@ var JSONParseError = ApplicationError{
 	Message:    "Something went wrong",
 	HTTPStatus: http.StatusInternalServerError,
 }
+
+// ResourceNotFound - could not find resource
+var ResourceNotFound = ApplicationError{
+	Code:       "ResourceNotFound",
+	Message:    "There is no resource at that location",
+	HTTPStatus: http.StatusNotFound,
+}

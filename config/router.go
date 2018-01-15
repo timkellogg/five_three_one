@@ -4,7 +4,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/timkellogg/five_three_one/app/middlewares"
+
 	"github.com/gorilla/mux"
+	"github.com/timkellogg/five_three_one/app/controllers"
 )
 
 // Route - application endpoint accessible through public http methods
@@ -26,6 +29,9 @@ type Cors struct {
 // NewRouter establishes the root application router
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+
+	// Error handlers
+	router.NotFoundHandler = middlewares.SetHeaders(controllers.Errors404)
 
 	for _, route := range routes {
 		var handler http.Handler
