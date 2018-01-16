@@ -1,73 +1,41 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
+	"flag"
 	"log"
-	"net/http"
-	"strconv"
+	"os"
 
-	"github.com/bradleypeabody/gorilla-sessions-memcache"
-	"github.com/rs/cors"
-
-	"github.com/bradfitz/gomemcache/memcache"
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/timkellogg/five_three_one/config"
 )
 
-// Application - main container for application database, etc.
-type Application struct {
-	DB      *sql.DB
-	Session *gsm.MemcacheStore
-	Router  http.Handler
-}
-
-var app Application
-
-// Initialize - start and boostrap application pieces like database, cache, etc.
-func (a *Application) Initialize(c config.ApplicationConfiguration) {
-	var err error
-	var connection string
-
-	if c.DBPass == "" {
-		connection = fmt.Sprintf("dbname=%s", c.DBName)
-	} else {
-		connection = fmt.Sprintf("user=%s password=%s dbname=%s", c.DBUser, c.DBPass, c.DBName)
-	}
-
-	a.DB, err = sql.Open("postgres", connection)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer a.DB.Close()
-
-	err = a.DB.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	loggingLevel, err := strconv.Atoi(c.SessionLoggingLevel)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	router := config.NewRouter()
-
-	memcacheClient := memcache.New(c.MemecachePort)
-	a.Session = gsm.NewMemcacheStore(memcacheClient, c.MemecacheName, []byte(c.SessionSecret))
-	a.Session.Logging = loggingLevel
-
-	a.Router = cors.Default().Handler(router)
-}
-
-// Run - launch http server to listen on address
-func (a *Application) Run(address string) {
-	log.Fatal(http.ListenAndServe(address, a.Router))
-}
-
 func main() {
-	a := Application{}
-	a.Initialize(config.DevConfig)
-	a.Run(":" + config.DevConfig.Port)
+	loadEnvironment()
+
+	applicationConfig := config.ApplicationConfiguration{
+		Port:                os.Getenv("PORT"),
+		DBName:              os.Getenv("DB_NAME"),
+		DBUser:              os.Getenv("DB_USER"),
+		DBPass:              os.Getenv("DB_PASS"),
+		MemecachePort:       os.Getenv("MEMECACHE_PORT"),
+		MemecacheName:       os.Getenv("MEMECACHE_NAME"),
+		SessionSecret:       os.Getenv("SESSION_SECRET"),
+		SessionLoggingLevel: os.Getenv("SESSION_LOGGING_LEVEL"),
+	}
+
+	application := config.Application{}
+	application.Initialize(applicationConfig)
+	application.Run(applicationConfig.Port)
+}
+
+func loadEnvironment() {
+	var environmentFile string
+	environment := flag.String("environment", "development", "Indicates the application environment")
+
+	environmentFile = ".env." + *environment
+	err := godotenv.Load(environmentFile)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
