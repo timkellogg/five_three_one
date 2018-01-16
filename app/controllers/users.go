@@ -17,7 +17,6 @@ func UsersCreate(w http.ResponseWriter, r *http.Request) {
 		handleError(err, models.JSONParseError, w)
 	}
 
-	u.CreateUser()
 	// authentication.CreateToken()
 
 	// handleError(nil, models.NotImplementedError, w)

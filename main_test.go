@@ -11,8 +11,22 @@ import (
 	"github.com/timkellogg/five_three_one/config"
 )
 
+// TestConfig - app config for testing env
+var TestConfig = config.ApplicationConfiguration{
+	Port:                os.Getenv("TEST_PORT"),
+	DBName:              os.Getenv("TEST_DB_NAME"),
+	DBUser:              os.Getenv("TEST_DB_USER"),
+	DBPass:              os.Getenv("TEST_DB_PASS"),
+	MemecachePort:       os.Getenv("TEST_MEMECACHE_PORT"),
+	MemecacheName:       os.Getenv("TEST_MEMECACHE_NAME"),
+	SessionSecret:       os.Getenv("TEST_SESSION_SECRET"),
+	SessionLoggingLevel: os.Getenv("TEST_SESSION_LOGGING_LEVEL"),
+}
+
+var a config.Application
+
 func TestMain(m *testing.M) {
-	app.Initialize(config.TestConfig)
+	a.Initialize(TestConfig)
 
 	code := m.Run()
 
@@ -22,7 +36,7 @@ func TestMain(m *testing.M) {
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 
-	app.Router.ServeHTTP(rr, req)
+	a.Router.ServeHTTP(rr, req)
 
 	return rr
 }
@@ -35,7 +49,7 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 
 func clearTables(tables []string) {
 	for table := range tables {
-		app.DB.Exec("TRUNCATE %s;", table)
+		a.DB.Exec("TRUNCATE %s;", table)
 	}
 }
 
