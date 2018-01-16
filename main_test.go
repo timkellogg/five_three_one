@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -80,4 +81,18 @@ func TestControllersErrors404(t *testing.T) {
 	if m["message"] != expectedMessage {
 		t.Errorf("Expected message to be '%s' but found %s", expectedMessage, m["message"])
 	}
+}
+
+func TestControllersUsersCreate(t *testing.T) {
+	invalidPayload := []byte(`{"email":"","password":""}`)
+
+	req, _ := http.NewRequest("POST", "/api/users/create", bytes.NewBuffer(invalidPayload))
+
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var m map[string]string
+	json.Unmarshal(response.Body.Bytes(), &m)
+
 }

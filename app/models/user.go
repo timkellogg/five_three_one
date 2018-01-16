@@ -1,13 +1,22 @@
 package models
 
-import "errors"
+import (
+	"database/sql"
+)
 
 // User - a consumer of the application
 type User struct {
-	firstName string
+	ID       int64
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-// Validate - validate user fields
-func (u User) Validate() error {
-	return errors.New("Not Implemented")
+// CreateUser - saves user to db
+func (u *User) CreateUser(db *sql.DB) error {
+	err := db.QueryRow("INSERT INTO users(email) VALUES($1) RETURNING id", u.Email).Scan(&u.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

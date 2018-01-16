@@ -14,6 +14,7 @@ var DevConfig = ApplicationConfiguration{
 	devMemecacheName,
 	devSessionSecret,
 	devSessionLoggingLevel,
+	devJWTSecret,
 }
 
 var devPort = os.Getenv("DEV_PORT")

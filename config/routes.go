@@ -7,4 +7,5 @@ import (
 
 var routes = Routes{
 	Route{"Info", "GET", "/api/info", middlewares.SetHeaders(controllers.InfoShow)},
+	Route{"Users Create", "POST", "/api/users/create", middlewares.SetHeaders(controllers.UsersCreate)},
 }

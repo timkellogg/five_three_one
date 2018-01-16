@@ -1,8 +1,5 @@
 package config
 
-// load config
-import _ "github.com/joho/godotenv/autoload"
-
 // ApplicationConfiguration - server environment details
 type ApplicationConfiguration struct {
 	Port                string
