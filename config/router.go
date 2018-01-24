@@ -30,6 +30,7 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	// Error handlers
+	// This is causing the import cycle. It's needing to import controllers here
 	router.NotFoundHandler = middlewares.SetHeaders(controllers.Errors404)
 
 	for _, route := range routes {
