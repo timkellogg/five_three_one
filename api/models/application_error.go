@@ -31,3 +31,10 @@ var NotImplementedError = ApplicationError{
 	Message:    "Endpoint is not implemented yet",
 	HTTPStatus: http.StatusNotImplemented,
 }
+
+// TokenCreateError - something went wrong with creating JWT
+var TokenCreateError = ApplicationError{
+	Code:       "TokenNotCreated",
+	Message:    "Token was not valid",
+	HTTPStatus: http.StatusInternalServerError,
+}

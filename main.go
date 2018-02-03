@@ -3,30 +3,28 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/timkellogg/five_three_one/config"
+	"github.com/timkellogg/five_three_one/api/controllers"
+	"github.com/timkellogg/five_three_one/api/middlewares"
 )
+
+var routes = Routes{
+	Route{"Info", "GET", "/api/info", middlewares.SetHeaders(controllers.InfoShow)},
+	Route{"Users Create", "POST", "/api/users/create", middlewares.SetHeaders(controllers.UsersCreate)},
+}
 
 func main() {
 	loadEnvironment()
 
-	applicationConfig := config.ApplicationConfiguration{
-		Port:                os.Getenv("PORT"),
-		DBName:              os.Getenv("DB_NAME"),
-		DBUser:              os.Getenv("DB_USER"),
-		DBPass:              os.Getenv("DB_PASS"),
-		MemecachePort:       os.Getenv("MEMECACHE_PORT"),
-		MemecacheName:       os.Getenv("MEMECACHE_NAME"),
-		SessionSecret:       os.Getenv("SESSION_SECRET"),
-		SessionLoggingLevel: os.Getenv("SESSION_LOGGING_LEVEL"),
-	}
+	router := NewRouter(routes)
 
-	application := config.Application{}
-	application.Initialize(applicationConfig)
-	application.Run(applicationConfig.Port)
+	port := os.Getenv("PORT")
+
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func loadEnvironment() {

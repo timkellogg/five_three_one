@@ -1,12 +1,13 @@
-package config
+package main
 
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/timkellogg/five_three_one/app/controllers"
-	"github.com/timkellogg/five_three_one/app/middlewares"
+	"github.com/timkellogg/five_three_one/api/controllers"
+	"github.com/timkellogg/five_three_one/api/middlewares"
 )
 
 // Route - application endpoint accessible through public http methods
@@ -26,7 +27,7 @@ type Cors struct {
 }
 
 // NewRouter establishes the root application router
-func NewRouter() *mux.Router {
+func NewRouter(r Routes) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	// Error handlers
@@ -36,7 +37,7 @@ func NewRouter() *mux.Router {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
+		handler = logRoute(handler, route.Name)
 
 		router.
 			Methods(route.Method).
@@ -46,4 +47,20 @@ func NewRouter() *mux.Router {
 	}
 
 	return router
+}
+
+func logRoute(inner http.Handler, name string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		inner.ServeHTTP(w, r)
+
+		log.Printf(
+			"%s\t%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			name,
+			time.Since(start),
+		)
+	})
 }
