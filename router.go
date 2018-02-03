@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/timkellogg/five_three_one/app/controllers"
-	"github.com/timkellogg/five_three_one/app/middlewares"
+	"github.com/timkellogg/five_three_one/api/controllers"
+	"github.com/timkellogg/five_three_one/api/middlewares"
 )
 
 // Route - application endpoint accessible through public http methods

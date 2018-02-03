@@ -8,8 +8,8 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/timkellogg/five_three_one/app/controllers"
-	"github.com/timkellogg/five_three_one/app/middlewares"
+	"github.com/timkellogg/five_three_one/api/controllers"
+	"github.com/timkellogg/five_three_one/api/middlewares"
 )
 
 var routes = Routes{

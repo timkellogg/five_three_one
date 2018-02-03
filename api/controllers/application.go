@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/timkellogg/five_three_one/app/models"
+	"github.com/timkellogg/five_three_one/api/models"
 )
 
 func handleError(e error, appError models.ApplicationError, w http.ResponseWriter) {

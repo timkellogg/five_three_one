@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/timkellogg/five_three_one/app/models"
+	"github.com/timkellogg/five_three_one/api/models"
 )
 
 // InfoShow - prints out details about api

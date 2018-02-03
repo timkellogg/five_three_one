@@ -8,8 +8,11 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+// AuthService - provides authentication
+type AuthService struct{}
+
 // CreateToken - signs and encrypts auth token
-func CreateToken(email, password string) (string, error) {
+func (a *AuthService) CreateToken(email, password string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// claims

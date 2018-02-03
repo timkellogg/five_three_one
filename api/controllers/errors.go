@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/timkellogg/five_three_one/app/models"
+	"github.com/timkellogg/five_three_one/api/models"
 )
 
 // Errors404 - Not found handler
