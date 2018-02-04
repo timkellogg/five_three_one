@@ -1,35 +1,81 @@
 package authentication
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // AuthService - provides authentication
 type AuthService struct{}
 
 // CreateToken - signs and encrypts auth token
-func (a *AuthService) CreateToken(email, password string) (string, error) {
+func (a *AuthService) CreateToken(email, id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims = buildClaims(email, id)
 
-	// claims
-	claims := make(jwt.MapClaims)
-	claims["email"] = email
-	claims["password"] = password
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
-	claims["iat"] = time.Now().Unix()
-
-	token.Claims = claims
-
-	// should use different config instead of hardcoding to use DevConfig
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	tokenString, err := token.SignedString([]byte(os.Getenv("AUTH_SECRET")))
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 
 	return tokenString, nil
+}
+
+// VerifyToken - checks that token is valid
+func (a *AuthService) VerifyToken(tokenString string) bool {
+	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(os.Getenv("AUTH_SECRET")), nil
+	})
+
+	if token == nil {
+		return false
+	}
+
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return true
+	}
+
+	return false
+}
+
+// Encrypt string - encrypts string using bcrypt hashing algo
+func (a *AuthService) Encrypt(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 7)
+	return string(bytes), err
+}
+
+// Decrypt - checks if hash matches decrypted string
+func (a *AuthService) Decrypt(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
+func getKey(t *jwt.Token) (interface{}, error) {
+	return []byte(os.Getenv("AUTH_SECRET")), nil
+}
+
+func buildClaims(email, id string) jwt.Claims {
+	var expireToken time.Duration
+
+	expireToken, err := time.ParseDuration(os.Getenv("AUTH_EXP"))
+	if err != nil {
+		expireToken = 24
+	}
+
+	claims := make(jwt.MapClaims)
+
+	claims["email"] = email
+	claims["user_id"] = id
+	claims["exp"] = time.Now().Add(time.Hour * expireToken).Unix()
+	claims["iat"] = time.Now().Unix()
+
+	return claims
 }
