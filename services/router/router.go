@@ -25,7 +25,7 @@ type Cors struct {
 }
 
 // NewRouter establishes the root application router
-func NewRouter(routes []Route, notFoundHandler http.HandlerFunc) *mux.Router {
+func NewRouter(routes Routes, notFoundHandler http.HandlerFunc) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.NotFoundHandler = notFoundHandler
