@@ -17,11 +17,10 @@ func UsersCreate(w http.ResponseWriter, r *http.Request) {
 		handleError(err, models.JSONParseError, w)
 	}
 
-	// token, err := authentication.CreateToken(u.Email, u.Password)
-	// if err != nil {
-	// 	handleError(err, models.TokenCreateError, w)
-	// }
+	if err != nil {
+		handleError(err, models.TokenCreateError, w)
+	}
 
-	// handleError(nil, models.NotImplementedError, w)
+	handleError(nil, models.NotImplementedError, w)
 	w.WriteHeader(http.StatusUnprocessableEntity)
 }

@@ -1,7 +1,10 @@
 package models
 
 import (
+	"database/sql"
 	"time"
+
+	"github.com/timkellogg/five_three_one/services/authentication"
 )
 
 // User - a consumer of the application
@@ -14,12 +17,18 @@ type User struct {
 }
 
 // CreateUser - saves user to db
-func (u *User) CreateUser() error {
-	obfuscatedID := createObfuscatedID()
+func (u *User) CreateUser(db *sql.DB, auth *authentication.AuthService, password string) error {
+	var err error
 
-	// create token
+	u.ObfuscatedID = createObfuscatedID()
 
-	err := Database.QueryRow("INSERT INTO users(email) VALUES($1) RETURNING id", u.Email).Scan(&u.ID)
+	u.EncryptedPassword, err = auth.Encrypt(password)
+	if err != nil {
+		return err
+	}
+
+	err = db.QueryRow("INSERT INTO users(email, obfuscated_id, encrypted_password) VALUES($1, $2, $3) RETURNING id",
+		u.Email, u.ObfuscatedID, u.EncryptedPassword).Scan(&u.ID)
 	if err != nil {
 		return err
 	}
