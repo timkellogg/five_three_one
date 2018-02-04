@@ -6,32 +6,24 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/timkellogg/five_three_one/api/middlewares"
+
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/timkellogg/five_three_one/api/controllers"
-	"github.com/timkellogg/five_three_one/api/middlewares"
-	"github.com/timkellogg/five_three_one/services/authentication"
-	"github.com/timkellogg/five_three_one/services/database"
-	"github.com/timkellogg/five_three_one/services/session"
+	"github.com/timkellogg/five_three_one/services/router"
 )
 
-var routes = Routes{
+var routes = router.Routes{
 	Route{"Info", "GET", "/api/info", middlewares.SetHeaders(controllers.InfoShow)},
 	Route{"Users Create", "POST", "/api/users/create", middlewares.SetHeaders(controllers.UsersCreate)},
-}
-
-// Store - storage objects
-type Store struct {
-	Database database.Database
-	Session  session.Session
-	Auth     authentication.AuthService
 }
 
 func main() {
 	loadEnvironment()
 
-	router := NewRouter(routes)
-
+	notFoundHandler := middlewares.SetHeaders(controllers.Errors404)
+	router := router.NewRouter(routes, notFoundHandler)
 	port := os.Getenv("PORT")
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
