@@ -10,7 +10,11 @@ import (
 
 // InfoShow - prints out details about api
 func InfoShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	info := models.Info{Major: "0", Minor: "0", Patch: "1"}
+	info := models.Info{
+		Major: models.Major,
+		Minor: models.Minor,
+		Patch: models.Patch,
+	}
 
 	i, err := json.Marshal(info)
 	if err != nil {
