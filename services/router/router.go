@@ -35,9 +35,12 @@ func NewRouter(context *config.ApplicationContext, routes Routes, notFoundHandle
 	router.NotFoundHandler = notFoundHandler
 
 	for _, route := range routes {
-		router.Methods(route.Method).
+		router.
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
+			// TODO: fix HandlerFunc. Right now, it is overriding previous routes and setting a single handler for all
+			// this means that the last route is the only router with a handler
 			HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				logRoute(setJSONHeader(route.HandlerFunc), route.Name)(context, w, r)
 			})

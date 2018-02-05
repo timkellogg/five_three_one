@@ -42,6 +42,13 @@ var TokenCreateError = ApplicationError{
 	HTTPStatus: http.StatusInternalServerError,
 }
 
+// UserCreateError - user could not be created from attributes
+var UserCreateError = ApplicationError{
+	Code:       "UserCouldNotBeCreated",
+	Message:    "User attributes were not valid",
+	HTTPStatus: http.StatusUnprocessableEntity,
+}
+
 func handleError(e error, appError ApplicationError, w http.ResponseWriter) {
 	log.Println(e)
 	log.Println(appError.Code)

@@ -29,3 +29,11 @@ func LoadEnvironment() {
 		log.Fatal(err)
 	}
 }
+
+// PerformEnvChecks - makes sure the application is up
+func PerformEnvChecks(c ApplicationContext) {
+	err := c.Database.Ping()
+	if err != nil {
+		log.Fatalf("Database environment check failed: %s", err)
+	}
+}

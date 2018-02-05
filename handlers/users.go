@@ -3,24 +3,48 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/models"
 )
 
 // UsersCreate - create an application user
-func UsersCreate(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-
+func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var u models.User
-	err := decoder.Decode(&u)
+	var err error
+	var token string
+
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	err = decoder.Decode(&u)
 	if err != nil {
 		handleError(err, JSONParseError, w)
+		return
 	}
 
+	token, err = u.CreateUser(c)
 	if err != nil {
-		handleError(err, TokenCreateError, w)
+		handleError(err, UserCreateError, w)
+		return
 	}
 
-	handleError(nil, NotImplementedError, w)
-	w.WriteHeader(http.StatusUnprocessableEntity)
+	expiration := time.Now().Add(24 * time.Hour)
+	authorizationCookie := http.Cookie{
+		Name:    "Authorization",
+		Value:   token,
+		Expires: expiration,
+	}
+
+	serializedUser, err := json.Marshal(u)
+	if err != nil {
+		handleError(err, JSONParseError, w)
+		return
+	}
+
+	http.SetCookie(w, &authorizationCookie)
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write(serializedUser)
 }

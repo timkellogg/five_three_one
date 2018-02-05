@@ -25,11 +25,12 @@ var context = config.ApplicationContext{
 
 var routes = router.Routes{
 	router.Route{"Info", "GET", "/api/info", handlers.InfoShow},
-	// router.Route{"Users Create", "POST", "/api/users/create", router.AppHandler(context, handlers.UsersCreate)},
+	router.Route{"Users Create", "POST", "/api/users/create", handlers.UsersCreate},
 }
 
 func main() {
 	config.LoadEnvironment()
+	config.PerformEnvChecks(context)
 
 	notFoundHandler := handlers.Errors404
 	router := router.NewRouter(&context, routes, notFoundHandler)
