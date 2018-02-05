@@ -1,41 +1,40 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/timkellogg/five_three_one/api/middlewares"
+	"github.com/timkellogg/five_three_one/config"
+	"github.com/timkellogg/five_three_one/services/authentication"
 
-	"github.com/joho/godotenv"
+	"github.com/timkellogg/five_three_one/services/session"
+
+	"github.com/timkellogg/five_three_one/services/database"
+
 	_ "github.com/lib/pq"
-	"github.com/timkellogg/five_three_one/api/controllers"
+	"github.com/timkellogg/five_three_one/handlers"
 	"github.com/timkellogg/five_three_one/services/router"
 )
 
+var context = config.ApplicationContext{
+	Database: database.NewDatabase().Store,
+	Session:  session.NewSession().Memcache,
+	Auth:     authentication.AuthService{},
+}
+
 var routes = router.Routes{
-	Route{"Info", "GET", "/api/info", middlewares.SetHeaders(controllers.InfoShow)},
-	Route{"Users Create", "POST", "/api/users/create", middlewares.SetHeaders(controllers.UsersCreate)},
+	router.Route{"Info", "GET", "/api/info", handlers.InfoShow},
+	// router.Route{"Users Create", "POST", "/api/users/create", router.AppHandler(context, handlers.UsersCreate)},
 }
 
 func main() {
-	loadEnvironment()
+	config.LoadEnvironment()
 
-	notFoundHandler := middlewares.SetHeaders(controllers.Errors404)
-	router := router.NewRouter(routes, notFoundHandler)
+	notFoundHandler := handlers.Errors404
+	router := router.NewRouter(&context, routes, notFoundHandler)
+
 	port := os.Getenv("PORT")
 
 	log.Fatal(http.ListenAndServe(":"+port, router))
-}
-
-func loadEnvironment() {
-	var environmentFile string
-	environment := flag.String("environment", "development", "Indicates the application environment")
-
-	environmentFile = ".env." + *environment
-	err := godotenv.Load(environmentFile)
-	if err != nil {
-		log.Fatal(err)
-	}
 }

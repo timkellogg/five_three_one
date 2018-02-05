@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
+	"github.com/timkellogg/five_three_one/config"
 )
 
 // Route - application endpoint accessible through public http methods
@@ -13,44 +15,42 @@ type Route struct {
 	Name        string
 	Method      string
 	Pattern     string
-	HandlerFunc http.HandlerFunc
+	HandlerFunc ContextHandlerFunc
 }
 
 // Routes - collection of endpoints
 type Routes []Route
 
-// Cors - Cors with logging
-type Cors struct {
-	Log *log.Logger
+// ContextHandlerFunc - placeholder
+type ContextHandlerFunc func(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
+
+func (context *ContextHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	context.ServeHTTP(w, r)
 }
 
 // NewRouter establishes the root application router
-func NewRouter(routes Routes, notFoundHandler http.HandlerFunc) *mux.Router {
+func NewRouter(context *config.ApplicationContext, routes Routes, notFoundHandler http.HandlerFunc) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.NotFoundHandler = notFoundHandler
 
 	for _, route := range routes {
-		var handler http.Handler
-
-		handler = route.HandlerFunc
-		handler = logRoute(handler, route.Name)
-
-		router.
-			Methods(route.Method).
+		router.Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(handler)
+			HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				logRoute(setJSONHeader(route.HandlerFunc), route.Name)(context, w, r)
+			})
 	}
 
 	return router
 }
 
-func logRoute(inner http.Handler, name string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func logRoute(inner ContextHandlerFunc, name string) ContextHandlerFunc {
+	return func(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		inner.ServeHTTP(w, r)
+		inner(c, w, r)
 
 		log.Printf(
 			"%s\t%s\t%s\t%s",
@@ -59,5 +59,12 @@ func logRoute(inner http.Handler, name string) http.Handler {
 			name,
 			time.Since(start),
 		)
-	})
+	}
+}
+
+func setJSONHeader(inner ContextHandlerFunc) ContextHandlerFunc {
+	return func(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		inner(c, w, r)
+	}
 }

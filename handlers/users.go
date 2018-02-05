@@ -1,10 +1,10 @@
-package controllers
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/timkellogg/five_three_one/api/models"
+	"github.com/timkellogg/five_three_one/models"
 )
 
 // UsersCreate - create an application user
@@ -14,13 +14,13 @@ func UsersCreate(w http.ResponseWriter, r *http.Request) {
 	var u models.User
 	err := decoder.Decode(&u)
 	if err != nil {
-		handleError(err, models.JSONParseError, w)
+		handleError(err, JSONParseError, w)
 	}
 
 	if err != nil {
-		handleError(err, models.TokenCreateError, w)
+		handleError(err, TokenCreateError, w)
 	}
 
-	handleError(nil, models.NotImplementedError, w)
+	handleError(nil, NotImplementedError, w)
 	w.WriteHeader(http.StatusUnprocessableEntity)
 }
