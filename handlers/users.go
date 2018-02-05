@@ -7,6 +7,7 @@ import (
 
 	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/models"
+	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
 // UsersCreate - create an application user
@@ -20,13 +21,13 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 
 	err = decoder.Decode(&u)
 	if err != nil {
-		handleError(err, JSONParseError, w)
+		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 
 	token, err = u.CreateUser(c)
 	if err != nil {
-		handleError(err, UserCreateError, w)
+		handleError(err, exceptions.UserCreateError, w)
 		return
 	}
 
@@ -39,7 +40,7 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 
 	serializedUser, err := json.Marshal(u)
 	if err != nil {
-		handleError(err, JSONParseError, w)
+		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 

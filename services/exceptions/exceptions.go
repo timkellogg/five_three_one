@@ -2,7 +2,6 @@ package exceptions
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 )
@@ -42,6 +41,13 @@ var TokenCreateError = ApplicationException{
 	HTTPStatus: http.StatusInternalServerError,
 }
 
+// UserCreateError - user could not be created from attributes
+var UserCreateError = ApplicationException{
+	Code:       "UserCouldNotBeCreated",
+	Message:    "User attributes were not valid",
+	HTTPStatus: http.StatusUnprocessableEntity,
+}
+
 func handleError(e error, appError ApplicationException, w http.ResponseWriter) {
 	log.Println(e)
 	log.Println(appError.Code)
@@ -53,10 +59,4 @@ func handleError(e error, appError ApplicationException, w http.ResponseWriter) 
 
 	w.WriteHeader(appError.HTTPStatus)
 	w.Write(ae)
-}
-
-// Errors404 - Not found handler
-func Errors404(w http.ResponseWriter, r *http.Request) {
-	err := errors.New("Resource Not Found")
-	handleError(err, ResourceNotFoundError, w)
 }
