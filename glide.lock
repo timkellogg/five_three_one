@@ -1,0 +1,33 @@
+hash: 4f482cbc5a3c2bea67173f57003b9cbadf3f59b73a4a9078f954b12b82094fe1
+updated: 2018-02-06T22:15:39.15942187-08:00
+imports:
+- name: github.com/bradfitz/gomemcache
+  version: 1952afaa557dc08e8e0d89eafab110fb501c1a2b
+  subpackages:
+  - memcache
+- name: github.com/bradleypeabody/gorilla-sessions-memcache
+  version: 75ee37df8664a47cd5d9eb84d41e1f2b08086893
+- name: github.com/dgrijalva/jwt-go
+  version: dbeaa9332f19a944acb5736b4456cfcc02140e29
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 53c1911da2b537f792e7cafcb446b05ffe33b996
+- name: github.com/gorilla/securecookie
+  version: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
+- name: github.com/gorilla/sessions
+  version: 41ee504a3bfe9b07b2d62ba5cc2e1314cabb4a63
+- name: github.com/joho/godotenv
+  version: a79fa1e548e2c689c241d10173efd51e5d689d5b
+- name: github.com/lib/pq
+  version: 88edab0803230a3898347e77b474f8c1820a1f20
+  subpackages:
+  - oid
+- name: github.com/satori/go.uuid
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
+- name: golang.org/x/crypto
+  version: d9133f5469342136e669e85192a26056b587f503
+  subpackages:
+  - bcrypt
+  - blowfish
+testImports: []

@@ -1,0 +1,18 @@
+package: github.com/timkellogg/five_three_one
+import:
+- package: github.com/bradfitz/gomemcache
+  subpackages:
+  - memcache
+- package: github.com/bradleypeabody/gorilla-sessions-memcache
+- package: github.com/dgrijalva/jwt-go
+  version: v3.1.0
+- package: github.com/gorilla/mux
+  version: ^1.6.1
+- package: github.com/joho/godotenv
+  version: ^1.2.0
+- package: github.com/lib/pq
+- package: github.com/satori/go.uuid
+  version: ^1.2.0
+- package: golang.org/x/crypto
+  subpackages:
+  - bcrypt
