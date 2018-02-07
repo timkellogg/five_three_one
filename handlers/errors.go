@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
@@ -23,7 +24,7 @@ func handleError(e error, appError exceptions.ApplicationException, w http.Respo
 }
 
 // Errors404 - Not found handler
-func Errors404(w http.ResponseWriter, r *http.Request) {
+func Errors404(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	err := errors.New("Resource Not Found")
 	handleError(err, exceptions.ResourceNotFoundError, w)
 }

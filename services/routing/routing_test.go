@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,6 +12,10 @@ import (
 	"github.com/timkellogg/five_three_one/services/session"
 )
 
+type message struct {
+	body string
+}
+
 // TODO: figure out how to decouple
 var context = config.ApplicationContext{
 	Database: database.NewDatabase().Store,
@@ -19,6 +24,10 @@ var context = config.ApplicationContext{
 }
 
 func testSimpleRoute(context *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+	msg := message{body: "Hello World"}
+	m, _ := json.Marshal(msg)
+
+	w.Write(m)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -44,6 +53,11 @@ func TestNewRouter(t *testing.T) {
 
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("Router failed to recieve status 200 for active route. Instead got %v", res.StatusCode)
+	}
+
+	contentType := res.Header.Get("Content-Type")
+	if contentType != "application/json" {
+		t.Error("Middlewares failed to set content type to application/json")
 	}
 
 	// unknown routes
