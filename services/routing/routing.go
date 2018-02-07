@@ -33,7 +33,7 @@ func NewRouter(context *config.ApplicationContext, routes Routes, notFoundHandle
 	router.NotFoundHandler = notFoundHandler
 
 	for _, route := range routes {
-		route := route
+		route := route // make a copy of the route for use in the lambda
 
 		router.Methods(route.Method).
 			PathPrefix("/api").

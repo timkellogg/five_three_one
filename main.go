@@ -33,8 +33,7 @@ func main() {
 	config.LoadEnvironment()
 	config.PerformEnvChecks(context)
 
-	notFoundHandler := handlers.Errors404
-	router := routing.NewRouter(&context, routes, notFoundHandler)
+	router := routing.NewRouter(&context, routes, handlers.Errors404)
 
 	port := os.Getenv("PORT")
 
