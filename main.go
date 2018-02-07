@@ -31,7 +31,7 @@ var routes = routing.Routes{
 
 func main() {
 	config.LoadEnvironment()
-	context.PerformEnvChecks()
+	// context.PerformEnvChecks()
 
 	router := routing.NewRouter(&context, routes, handlers.Errors404)
 
