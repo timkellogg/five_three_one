@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -35,5 +36,13 @@ func PerformEnvChecks(c ApplicationContext) {
 	err := c.Database.Ping()
 	if err != nil {
 		log.Fatalf("Database environment check failed: %s", err)
+	}
+}
+
+// TruncateDBTables - removes all data from tables
+func (c *ApplicationContext) TruncateDBTables(tables []string) {
+	for _, table := range tables {
+		query := fmt.Sprintf("TRUNCATE TABLE %s;", table)
+		c.Database.Exec(query)
 	}
 }
