@@ -13,6 +13,5 @@ WORKDIR $APPPATH
 
 EXPOSE $PORT
 
-RUN ls
 RUN go build
 RUN ./five_three_one
