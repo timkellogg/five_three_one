@@ -48,3 +48,13 @@ start:
   desc: autoreloads application
   cmds:
     - fresh
+
+test:
+  desc: run all package tests
+  cmds:
+    - go test ./models
+    - go test ./services/session
+    - go test ./services/routing
+    - go test ./services/database
+    - go test ./services/authentication
+    - go test ./handlers
