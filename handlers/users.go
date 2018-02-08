@@ -38,7 +38,7 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		Expires: expiration,
 	}
 
-	serializedUser, err := json.Marshal(u)
+	serializedUser, err := u.SerializedUser(c)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return

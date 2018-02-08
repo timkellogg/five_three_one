@@ -2,6 +2,7 @@ package models
 
 import (
 	"testing"
+	"time"
 )
 
 func TestUsersCreate(t *testing.T) {
@@ -34,5 +35,28 @@ func TestUsersCreate(t *testing.T) {
 
 	if rowsChanged != 1 {
 		t.Error("User was not persisted")
+	}
+}
+
+func TestSerializedUser(t *testing.T) {
+	u := User{
+		ID:                1,
+		Email:             "test@test.com",
+		ObfuscatedID:      "some-string",
+		Password:          "password",
+		EncryptedPassword: "a90ahind",
+		CreatedAt:         time.Now(),
+		UpdatedAt:         time.Now(),
+	}
+
+	s, err := u.SerializedUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectedResponse := `{"email":"test@test.com","obfuscated_id":"some-string"}`
+
+	if string(s) != expectedResponse {
+		t.Errorf("User serialized incorrectly: %s", expectedResponse)
 	}
 }
