@@ -47,6 +47,7 @@ func TestSerializedUser(t *testing.T) {
 		EncryptedPassword: "a90ahind",
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
+		Active:            true,
 	}
 
 	s, err := u.SerializedUser(&context)
@@ -54,9 +55,9 @@ func TestSerializedUser(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedResponse := `{"email":"test@test.com","obfuscated_id":"some-string"}`
+	expectedResponse := `{"active":"true","email":"test@test.com","obfuscated_id":"some-string"}`
 
 	if string(s) != expectedResponse {
-		t.Errorf("User serialized incorrectly: %s", expectedResponse)
+		t.Errorf("User serialized %s, but should have returned: %s", s, expectedResponse)
 	}
 }

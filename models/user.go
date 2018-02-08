@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/timkellogg/five_three_one/config"
@@ -14,6 +15,7 @@ type User struct {
 	Email             string    `json:"email" db:"email"`
 	Password          string    `json:"password" db:""`
 	EncryptedPassword string    `json:"-" db:"encrypted_password"`
+	Active            bool      `json:"active" db:"active"`
 	CreatedAt         time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
@@ -24,7 +26,7 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	var token string
 
 	u.ObfuscatedID = createObfuscatedID()
-
+	u.Active = true
 	u.EncryptedPassword, err = c.Auth.Encrypt(u.Password)
 	if err != nil {
 		return "", err
@@ -49,5 +51,6 @@ func (u *User) SerializedUser(c *config.ApplicationContext) ([]byte, error) {
 	s := make(map[string]string)
 	s["obfuscated_id"] = u.ObfuscatedID
 	s["email"] = u.Email
+	s["active"] = strconv.FormatBool(u.Active)
 	return json.Marshal(s)
 }
