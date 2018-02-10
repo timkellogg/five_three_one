@@ -6,6 +6,8 @@ import (
 )
 
 func TestUsersCreate(t *testing.T) {
+	defer context.TruncateDBTables()
+
 	token, err := testUser.CreateUser(&context)
 	if err != nil {
 		t.Error(err)
@@ -39,6 +41,8 @@ func TestUsersCreate(t *testing.T) {
 }
 
 func TestSerializedUser(t *testing.T) {
+	defer context.TruncateDBTables()
+
 	u := User{
 		ID:                1,
 		Email:             "test@test.com",
@@ -59,5 +63,25 @@ func TestSerializedUser(t *testing.T) {
 
 	if string(s) != expectedResponse {
 		t.Errorf("User serialized %s, but should have returned: %s", s, expectedResponse)
+	}
+}
+
+func TestUsersFindByObfuscatedID(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	var u User
+
+	_, err := testUser.CreateUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	returnedUser, err := u.FindByObfuscatedID(&context, testUser.ObfuscatedID)
+	if err != nil {
+		t.Errorf("Could not find user: %s", err)
+	}
+
+	if returnedUser.Email != testUser.Email {
+		t.Errorf("FindByObfuscatedID returned %s when it should have returned: %s", returnedUser.Email, testUser.Email)
 	}
 }

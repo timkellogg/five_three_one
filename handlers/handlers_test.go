@@ -24,7 +24,10 @@ var testUser = models.User{Email: "test@test.com"}
 var routes = routing.Routes{
 	routing.Route{"Info", "GET", "/info", InfoShow},
 	routing.Route{"Users Create", "POST", "/users/create", UsersCreate},
+	routing.Route{"Users Show", "GET", "/users/me", UsersShow},
 }
+
+// need server to be able to keep track of cookies
 
 func TestMain(m *testing.M) {
 	os.Setenv("DB_NAME", "five_three_one_test")
@@ -37,15 +40,9 @@ func TestMain(m *testing.M) {
 	}
 	defer context.Database.Close()
 
-	context.TruncateDBTables(tables())
-
 	router = routing.NewRouter(&context, routes, Errors404)
 	server = httptest.NewServer(router)
 
 	runTests := m.Run()
 	os.Exit(runTests)
-}
-
-func tables() []string {
-	return []string{"users"}
 }

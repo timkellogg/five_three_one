@@ -49,3 +49,24 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusCreated)
 	w.Write(serializedUser)
 }
+
+// UsersShow - return customer details
+func UsersShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+	var u models.User
+
+	obfuscatedID := requireAuthorization(c, w, r)
+
+	returnedUser, err := u.FindByObfuscatedID(c, obfuscatedID)
+	if err != nil {
+		handleError(err, exceptions.UserNotAuthorized, w)
+	}
+
+	serializedUser, err := returnedUser.SerializedUser(c)
+	if err != nil {
+		handleError(err, exceptions.JSONParseError, w)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(serializedUser)
+}

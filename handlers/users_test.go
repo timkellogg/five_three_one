@@ -8,6 +8,8 @@ import (
 )
 
 func TestUsersCreate(t *testing.T) {
+	defer context.TruncateDBTables()
+
 	url := server.URL + "/api/users/create"
 	payload := `{"email": "test@test.com", "password": "password"}`
 	reader := strings.NewReader(payload)
@@ -29,5 +31,25 @@ func TestUsersCreate(t *testing.T) {
 	returnedResponse := string(body)
 	if returnedResponse == "" {
 		t.Error("Response was empty")
+	}
+}
+
+func TestUsersShow(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	url := server.URL + "/api/users/me"
+
+	_, err := testUser.CreateUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Expected status 200 but received %d", res.StatusCode)
 	}
 }

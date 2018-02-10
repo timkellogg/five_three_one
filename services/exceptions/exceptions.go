@@ -48,6 +48,13 @@ var UserCreateError = ApplicationException{
 	HTTPStatus: http.StatusUnprocessableEntity,
 }
 
+// UserNotAuthorized - user does not have a valid Authorization header
+var UserNotAuthorized = ApplicationException{
+	Code:       "UserNotAuthorized",
+	Message:    "User does not valid token",
+	HTTPStatus: http.StatusUnauthorized,
+}
+
 func handleError(e error, appError ApplicationException, w http.ResponseWriter) {
 	log.Println(e)
 	log.Println(appError.Code)

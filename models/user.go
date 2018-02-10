@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -13,7 +14,7 @@ type User struct {
 	ID                int64
 	ObfuscatedID      string    `json:"obfuscated_id" db:"obfuscated_id"`
 	Email             string    `json:"email" db:"email"`
-	Password          string    `json:"password" db:""`
+	Password          string    `json:"password" db:"-"`
 	EncryptedPassword string    `json:"-" db:"encrypted_password"`
 	Active            bool      `json:"active" db:"active"`
 	CreatedAt         time.Time `json:"created_at" db:"created_at"`
@@ -27,12 +28,14 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 
 	u.ObfuscatedID = createObfuscatedID()
 	u.EncryptedPassword, err = c.Auth.Encrypt(u.Password)
+	u.Active = true
+
 	if err != nil {
 		return "", err
 	}
 
 	err = c.Database.QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1,$2,$3) RETURNING id",
-		u.Email, u.ObfuscatedID, u.EncryptedPassword).Scan(&u.ID)
+		u.Email, u.ObfuscatedID, u.EncryptedPassword, u.Active).Scan(&u.ID)
 	if err != nil {
 		return "", err
 	}
@@ -43,6 +46,26 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	}
 
 	return token, nil
+}
+
+// FindByObfuscatedID - returns user by obfuscatedID
+func (u *User) FindByObfuscatedID(c *config.ApplicationContext, obfuscatedID string) (User, error) {
+	var (
+		email        string
+		active       bool
+		returnedUser User
+	)
+
+	q := fmt.Sprintf("SELECT email, active FROM users WHERE obfuscated_id='%s'", obfuscatedID)
+	err := c.Database.QueryRow(q).Scan(&email, &active)
+	if err != nil {
+		return returnedUser, err
+	}
+
+	returnedUser.Email = email
+	returnedUser.Active = active
+
+	return returnedUser, nil
 }
 
 // SerializedUser - returns publicly accessible serialized user struct

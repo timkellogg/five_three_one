@@ -20,6 +20,7 @@ var context = config.ApplicationContext{}
 var routes = routing.Routes{
 	routing.Route{"Info", "GET", "/info", handlers.InfoShow},
 	routing.Route{"Users Create", "POST", "/users/create", handlers.UsersCreate},
+	routing.Route{"Users Show", "GET", "/users/me", handlers.UsersShow},
 }
 
 func main() {

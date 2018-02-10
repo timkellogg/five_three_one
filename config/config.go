@@ -34,27 +34,19 @@ func LoadEnvironment() {
 
 // PerformEnvChecks - make sure the application deps are running
 func (c *ApplicationContext) PerformEnvChecks() {
-	// checks if db is the correct one
-	// var name string
-	// c.Database.QueryRow("SELECT current_database()").Scan(&name)
-	// fmt.Println("db name:" + name)
-
 	err := c.Database.Ping()
 	if err != nil {
 		log.Fatalf("Database environment check failed: %s", err)
 	}
+}
 
-	r, err := c.Database.Exec("SELECT * FROM users;")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Tables: %v", r)
+func tables() []string {
+	return []string{"users"}
 }
 
 // TruncateDBTables - removes all data from tables
-func (c *ApplicationContext) TruncateDBTables(tables []string) {
-	for _, table := range tables {
+func (c *ApplicationContext) TruncateDBTables() {
+	for _, table := range tables() {
 		query := fmt.Sprintf("TRUNCATE TABLE %s;", table)
 		c.Database.Exec(query)
 	}
