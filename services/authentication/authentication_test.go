@@ -11,8 +11,9 @@ func TestAuthService(t *testing.T) {
 	auth := &AuthService{}
 
 	var (
-		valid bool
-		err   error
+		valid         bool
+		err           error
+		returnedToken string
 	)
 
 	email, id := "test@test.com", "1"
@@ -22,12 +23,16 @@ func TestAuthService(t *testing.T) {
 		t.Errorf("AuthService failed to create a token: %v", err)
 	}
 
-	valid = auth.VerifyToken(token)
+	returnedToken, valid = auth.VerifyToken(token)
 	if !valid {
 		t.Errorf("AuthService failed to verify token: %v", err)
 	}
 
-	valid = auth.VerifyToken("invalid")
+	if returnedToken != id {
+		t.Errorf("AuthService failed to return user id")
+	}
+
+	_, valid = auth.VerifyToken("invalid")
 	if valid {
 		t.Error("AuthService verified a bad token")
 	}

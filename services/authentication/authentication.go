@@ -25,8 +25,8 @@ func (a *AuthService) CreateToken(email, id string) (string, error) {
 	return tokenString, nil
 }
 
-// VerifyToken - checks that token is valid
-func (a *AuthService) VerifyToken(tokenString string) bool {
+// VerifyToken - checks that token is valid and returns user id if it is
+func (a *AuthService) VerifyToken(tokenString string) (string, bool) {
 	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -36,14 +36,15 @@ func (a *AuthService) VerifyToken(tokenString string) bool {
 	})
 
 	if token == nil {
-		return false
+		return "", false
 	}
 
-	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return true
+	if _, ok := token.Claims.(jwt.MapClaims)["user_id"]; ok && token.Valid {
+		userID := parseClaimsForValue(token, "user_id")
+		return userID, true
 	}
 
-	return false
+	return "", false
 }
 
 // Encrypt string - encrypts string using bcrypt hashing algo
@@ -78,4 +79,8 @@ func buildClaims(email, id string) jwt.Claims {
 	claims["iat"] = time.Now().Unix()
 
 	return claims
+}
+
+func parseClaimsForValue(token *jwt.Token, claimKey string) string {
+	return token.Claims.(jwt.MapClaims)[claimKey].(string)
 }
