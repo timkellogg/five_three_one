@@ -11,30 +11,24 @@ type UserToken struct {
 }
 
 // Save - saves token to db
-func (ut *UserToken) Save(c *config.ApplicationContext) (UserToken, error) {
-	var returnedUserToken UserToken
-
-	ut.Active = true
-
+func (ut *UserToken) Save(c *config.ApplicationContext) (*UserToken, error) {
 	err := c.Database.QueryRow("INSERT INTO user_tokens (user_id, token) VALUES($1,$2) RETURNING *", ut.UserID, ut.Token).Scan(&ut.ID, &ut.Token, &ut.UserID, &ut.Active)
 	if err != nil {
-		return returnedUserToken, err
+		return ut, err
 	}
 
-	return returnedUserToken, nil
+	return ut, nil
 }
 
 // Invalidate - sets token to be not active
-func (ut *UserToken) Invalidate(c *config.ApplicationContext) (UserToken, error) {
-	var returnedUserToken UserToken
-
+func (ut *UserToken) Invalidate(c *config.ApplicationContext) (*UserToken, error) {
 	ut.Active = false
 
-	err := c.Database.QueryRow("UPDATE user_tokens SET active = false WHERE user_id = $1 AND token = $2",
-		ut.UserID, ut.Token).Scan(&returnedUserToken)
+	err := c.Database.QueryRow("UPDATE user_tokens SET active = false WHERE user_id = $1 AND token = $2 RETURNING *",
+		ut.UserID, ut.Token).Scan(&ut.ID, &ut.Token, &ut.UserID, &ut.Active)
 	if err != nil {
-		return returnedUserToken, err
+		return ut, err
 	}
 
-	return returnedUserToken, nil
+	return ut, nil
 }
