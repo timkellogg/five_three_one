@@ -25,6 +25,7 @@ func LoadEnvironment() {
 	environment := flag.String("environment", "development", "Indicates the application environment")
 
 	environmentFile = ".env." + *environment
+
 	err := godotenv.Load(environmentFile)
 	if err != nil {
 		log.Fatal(err)
@@ -33,10 +34,22 @@ func LoadEnvironment() {
 
 // PerformEnvChecks - make sure the application deps are running
 func (c *ApplicationContext) PerformEnvChecks() {
+	// checks if db is the correct one
+	// var name string
+	// c.Database.QueryRow("SELECT current_database()").Scan(&name)
+	// fmt.Println("db name:" + name)
+
 	err := c.Database.Ping()
 	if err != nil {
 		log.Fatalf("Database environment check failed: %s", err)
 	}
+
+	r, err := c.Database.Exec("SELECT * FROM users;")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Tables: %v", r)
 }
 
 // TruncateDBTables - removes all data from tables

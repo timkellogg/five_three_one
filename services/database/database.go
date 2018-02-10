@@ -19,19 +19,11 @@ func NewDatabase() *Database {
 	d := &Database{}
 
 	var err error
-	var connection string
 
 	name := os.Getenv("DB_NAME")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
+	databaseURL := os.Getenv("DATABASE_URL")
 
-	if pass == "" {
-		connection = fmt.Sprintf("dbname=%s", name)
-	} else {
-		connection = fmt.Sprintf("user=%s password=%s dbname=%s", user, pass, name)
-	}
-
-	d.Store, err = sql.Open("postgres", connection)
+	d.Store, err = sql.Open("postgres", databaseURL)
 	if err != nil {
 		fmt.Println(err)
 	}

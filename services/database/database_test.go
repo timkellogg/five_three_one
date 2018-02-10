@@ -7,8 +7,7 @@ import (
 
 func TestNewDatabase(t *testing.T) {
 	os.Setenv("DB_NAME", "five_three_one_test")
-	os.Setenv("DB_USER", "")
-	os.Setenv("DB_PASS", "")
+	os.Setenv("DATABASE_URL", "postgres://tkellogg:password@localhost:5432/five_three_one_development?sslmode=disable")
 
 	database := NewDatabase()
 

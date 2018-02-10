@@ -29,14 +29,14 @@ migrate_test_db:
 migrate_down:
   desc: migrate down
   cmds:
-    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_development?sslmode=disable down
-    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_test?sslmode=disable down
+    - migrate -path ./migrations -database postgres://tkellogg:password@localhost:5432/five_three_one_development?sslmode=disable down
+    - migrate -path ./migrations -database postgres://tkellogg:password@localhost:5432/five_three_one_test?sslmode=disable down
 
 migrate_up:
   desc: migrate up
   cmds:
-    - migrate -path ./migrations  -database postgres://localhost:5432/five_three_one_development?sslmode=disable up
-    - migrate -path ./migrations -database postgres://localhost:5432/five_three_one_test?sslmode=disable up
+    - migrate -path ./migrations -database postgres://tkellogg:password@localhost:5432/five_three_one_development?sslmode=disable up
+    - migrate -path ./migrations -database postgres://tkellogg:password@localhost:5432/five_three_one_test?sslmode=disable up
 
 serve:
   desc: builds the application and execs binary

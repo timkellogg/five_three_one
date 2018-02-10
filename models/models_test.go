@@ -15,8 +15,7 @@ var testUser = User{Email: "test@test.com"}
 
 func TestMain(m *testing.M) {
 	os.Setenv("DB_NAME", "five_three_one_test")
-	os.Setenv("DB_USER", "")
-	os.Setenv("DB_PASS", "")
+	os.Setenv("DATABASE_URL", "postgres://tkellogg:password@localhost:5432/five_three_one_test?sslmode=disable")
 
 	context = config.ApplicationContext{
 		Database: database.NewDatabase().Store,

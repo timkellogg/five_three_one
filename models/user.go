@@ -26,13 +26,12 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	var token string
 
 	u.ObfuscatedID = createObfuscatedID()
-	u.Active = true
 	u.EncryptedPassword, err = c.Auth.Encrypt(u.Password)
 	if err != nil {
 		return "", err
 	}
 
-	err = c.Database.QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1, $2, $3) RETURNING id",
+	err = c.Database.QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1,$2,$3) RETURNING id",
 		u.Email, u.ObfuscatedID, u.EncryptedPassword).Scan(&u.ID)
 	if err != nil {
 		return "", err
