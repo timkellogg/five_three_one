@@ -41,7 +41,7 @@ func (c *ApplicationContext) PerformEnvChecks() {
 }
 
 func tables() []string {
-	return []string{"users"}
+	return []string{"users", "user_tokens"}
 }
 
 // TruncateDBTables - removes all data from tables

@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/satori/go.uuid"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,7 +17,7 @@ type AuthService struct{}
 // CreateToken - signs and encrypts auth token
 func (a *AuthService) CreateToken(email, id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims = buildClaims(email, id)
+	token.Claims = buildAccessTokenClaims(email, id)
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("AUTH_SECRET")))
 	if err != nil {
@@ -47,6 +49,19 @@ func (a *AuthService) VerifyToken(tokenString string) (string, bool) {
 	return "", false
 }
 
+// CreateRefreshToken - creates a valid refresh token
+func (a *AuthService) CreateRefreshToken(id string) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims = buildRefreshTokenClaims(id)
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("AUTH_SECRET")))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
 // Encrypt string - encrypts string using bcrypt hashing algo
 func (a *AuthService) Encrypt(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 7)
@@ -59,16 +74,22 @@ func (a *AuthService) Decrypt(password, hash string) bool {
 	return err == nil
 }
 
+// UniqueString - generate guuid string
+func (a *AuthService) UniqueString() string {
+	return UniqueString()
+}
+
 func getKey(t *jwt.Token) (interface{}, error) {
 	return []byte(os.Getenv("AUTH_SECRET")), nil
 }
 
-func buildClaims(email, id string) jwt.Claims {
+// buildAccessTokenClaims - creates short-lived "access token" claims for full auth
+func buildAccessTokenClaims(email, id string) jwt.Claims {
 	var expireToken time.Duration
 
 	expireToken, err := time.ParseDuration(os.Getenv("AUTH_EXP"))
 	if err != nil {
-		expireToken = 24
+		expireToken = 1
 	}
 
 	claims := make(jwt.MapClaims)
@@ -81,6 +102,23 @@ func buildClaims(email, id string) jwt.Claims {
 	return claims
 }
 
+// buildRefreshTokenClaims - creates long-lived "refresh token" claims for partial auth
+func buildRefreshTokenClaims(id string) jwt.Claims {
+	claims := make(jwt.MapClaims)
+
+	claims["jti"] = UniqueString()
+	claims["user_id"] = id
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	claims["iat"] = time.Now().Unix()
+
+	return claims
+}
+
 func parseClaimsForValue(token *jwt.Token, claimKey string) string {
 	return token.Claims.(jwt.MapClaims)[claimKey].(string)
+}
+
+// UniqueString - generate a unique uuid
+func UniqueString() string {
+	return uuid.NewV4().String()
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
+// requireAuthentication - verifies user based upon access token
 func requireAuthorization(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) string {
 	token := r.Header.Get("Authorization")
 	if token == "" {
@@ -21,4 +22,9 @@ func requireAuthorization(c *config.ApplicationContext, w http.ResponseWriter, r
 	}
 
 	return obfuscatedID
+}
+
+// addCSRFToken - creates a new CSRF token and passes that into the request header
+func addCSRFToken(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+	r.Header.Add("X-CSRF-Token", c.Auth.UniqueString())
 }

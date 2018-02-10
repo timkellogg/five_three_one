@@ -55,6 +55,13 @@ var UserNotAuthorized = ApplicationException{
 	HTTPStatus: http.StatusUnauthorized,
 }
 
+// RefreshTokenCreateError - signifies when a user could have a refresh token generated
+var RefreshTokenCreateError = ApplicationException{
+	Code:       "RefreshTokenNotCreated",
+	Message:    "Could not generate refresh token for user",
+	HTTPStatus: http.StatusInternalServerError,
+}
+
 func handleError(e error, appError ApplicationException, w http.ResponseWriter) {
 	log.Println(e)
 	log.Println(appError.Code)
