@@ -1,61 +1,88 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/models"
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
+// AuthResponse - structure of token response
+type AuthResponse struct {
+	TokenType    string    `json:"token_type"`
+	AccessToken  string    `json:"access_token"`
+	ExpiresIn    time.Time `json:"expires_in"`
+	RefreshToken string    `json:"refresh_token"`
+}
+
 // Login - refreshes tokens
 func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var u models.User
+	var (
+		user  *models.User
+		u     models.User
+		err   error
+		valid bool
+	)
 
-	obfuscatedID := requireAuthorization(c, w, r)
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 
-	// Find user
-	returnedUser, err := u.FindByObfuscatedID(c, obfuscatedID)
+	err = decoder.Decode(&u)
 	if err != nil {
-		handleError(err, exceptions.ResourceNotFoundError, w)
+		handleError(err, exceptions.JSONParseError, w)
+		return
 	}
 
-	// Add CSRF to header
-	addCSRFToken(c, w, r)
+	user, err = u.FindByEmail(c)
+	if err != nil {
+		handleError(err, exceptions.ResourceNotFoundError, w)
+		return
+	}
 
-	// Create refresh token
-	refreshToken, err := c.Auth.CreateRefreshToken(obfuscatedID)
+	valid = c.Auth.Decrypt(user.Password, user.EncryptedPassword)
+	if !valid {
+		handleError(err, exceptions.ResourceNotFoundError, w)
+		return
+	}
+
+	refreshToken, err := c.Auth.CreateRefreshToken(user.ObfuscatedID)
 	if err != nil {
 		handleError(err, exceptions.RefreshTokenCreateError, w)
 		return
 	}
 
-	// Store refresh token in database
+	ut := models.UserToken{Token: refreshToken, UserID: user.ID}
+	_, err = ut.Save(c)
+	if err != nil {
+		handleError(err, exceptions.RefreshTokenCreateError, w)
+		return
+	}
 
-	// Create access token
-	accessToken, err := c.Auth.CreateToken(returnedUser.Email, obfuscatedID)
+	accessToken, err := c.Auth.CreateToken(u.Email, u.ObfuscatedID)
 	if err != nil {
 		handleError(err, exceptions.TokenCreateError, w)
 		return
 	}
 
-	// authorizations table stores JTI (unique string to identify this specific token)
+	setCSRFToken(c, w, r)
+	setAuthorizationCookie(w, accessToken)
+
+	authResponse := AuthResponse{
+		TokenType:    "bearer",
+		AccessToken:  accessToken,
+		ExpiresIn:    time.Now().Add(time.Hour * 72),
+		RefreshToken: refreshToken,
+	}
+
+	response, err := json.Marshal(authResponse)
+	if err != nil {
+		handleError(err, exceptions.JSONParseError, w)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
-	// w.Write(i)
+	w.Write(response)
 }
-
-// expiration := time.Now().Add(24 * time.Hour)
-// authorizationCookie := http.Cookie{
-// 	Name:    "Authorization",
-// 	Value:   token,
-// 	Expires: expiration,
-// }
-
-// serializedUser, err := u.SerializedUser(c)
-// if err != nil {
-// 	handleError(err, exceptions.JSONParseError, w)
-// 	return
-// }
-
-// http.SetCookie(w, &authorizationCookie)

@@ -41,7 +41,7 @@ func TestUsersShow(t *testing.T) {
 
 	_, err := testUser.CreateUser(&context)
 	if err != nil {
-		t.Error(err)
+		t.Errorf("HERE: %v", err)
 	}
 
 	res, err := http.Get(url)

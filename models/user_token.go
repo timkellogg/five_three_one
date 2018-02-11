@@ -6,7 +6,7 @@ import "github.com/timkellogg/five_three_one/config"
 type UserToken struct {
 	ID     int64
 	Token  string `json:"token" db:"token"`
-	UserID int    `json:"user_id" db:"user_id"`
+	UserID int64  `json:"user_id" db:"user_id"`
 	Active bool   `json:"active" db:"active"`
 }
 

@@ -29,13 +29,14 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	u.ObfuscatedID = createObfuscatedID()
 	u.EncryptedPassword, err = c.Auth.Encrypt(u.Password)
 	u.Active = true
+	u.CreatedAt = time.Now()
 
 	if err != nil {
 		return "", err
 	}
 
 	err = c.Database.
-		QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1,$2,$3) RETURNING email, active", u.Email, u.ObfuscatedID, u.EncryptedPassword).
+		QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password, created_at) VALUES($1,$2,$3,$4) RETURNING email, active", u.Email, u.ObfuscatedID, u.EncryptedPassword, u.CreatedAt).
 		Scan(&u.Email, &u.Active)
 	if err != nil {
 		return "", err
@@ -67,6 +68,19 @@ func (u *User) FindByObfuscatedID(c *config.ApplicationContext, obfuscatedID str
 	returnedUser.Active = active
 
 	return returnedUser, nil
+}
+
+// FindByEmail - look up by email
+func (u *User) FindByEmail(c *config.ApplicationContext) (*User, error) {
+	err := c.Database.
+		QueryRow("SELECT email, active, encrypted_password, obfuscated_id FROM users WHERE email=$1", u.Email).
+		Scan(&u.Email, &u.Active, &u.EncryptedPassword, &u.ObfuscatedID)
+	if err != nil {
+		return u, err
+	}
+
+	fmt.Print(u.Email)
+	return u, nil
 }
 
 // SerializedUser - returns publicly accessible serialized user struct

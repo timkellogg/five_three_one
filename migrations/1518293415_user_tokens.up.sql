@@ -1,6 +1,6 @@
 CREATE TABLE user_tokens (
     id SERIAL PRIMARY KEY,
-    token VARCHAR(128) NOT NULL,
+    token VARCHAR(256) NOT NULL,
     user_id INTEGER NOT NULL,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP,

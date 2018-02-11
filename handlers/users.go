@@ -12,9 +12,11 @@ import (
 
 // UsersCreate - create an application user
 func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var u models.User
-	var err error
-	var token string
+	var (
+		u     models.User
+		err   error
+		token string
+	)
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
