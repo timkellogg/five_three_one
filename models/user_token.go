@@ -1,19 +1,27 @@
 package models
 
-import "github.com/timkellogg/five_three_one/config"
+import (
+	"time"
+
+	"github.com/timkellogg/five_three_one/config"
+)
 
 // UserToken - user's refresh tokens
 type UserToken struct {
-	ID     int64
-	Token  string `json:"token" db:"token"`
-	UserID int64  `json:"user_id" db:"user_id"`
-	Active bool   `json:"active" db:"active"`
+	ID        int64
+	Token     string    `json:"token" db:"token"`
+	UserID    int64     `json:"user_id" db:"user_id"`
+	Active    bool      `json:"active" db:"active"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // Save - saves token to db
 func (ut *UserToken) Save(c *config.ApplicationContext) (*UserToken, error) {
+	ut.CreatedAt = time.Now()
+
 	err := c.Database.
-		QueryRow("INSERT INTO user_tokens (user_id, token) VALUES($1,$2) RETURNING id, token, user_id, active", ut.UserID, ut.Token).
+		QueryRow("INSERT INTO user_tokens (user_id, token, created_at) VALUES($1,$2,$3) RETURNING id, token, user_id, active", ut.UserID, ut.Token, ut.CreatedAt).
 		Scan(&ut.ID, &ut.Token, &ut.UserID, &ut.Active)
 	if err != nil {
 		return ut, err
@@ -22,13 +30,11 @@ func (ut *UserToken) Save(c *config.ApplicationContext) (*UserToken, error) {
 	return ut, nil
 }
 
-// Invalidate - sets token to be not active
+// Invalidate - setstoken to be not active
 func (ut *UserToken) Invalidate(c *config.ApplicationContext) (*UserToken, error) {
-	ut.Active = false
+	ut.UpdatedAt = time.Now()
 
-	err := c.Database.
-		QueryRow("UPDATE user_tokens SET active = false WHERE user_id = $1 AND token = $2 RETURNING id, token, user_id, active", ut.UserID, ut.Token).
-		Scan(&ut.ID, &ut.Token, &ut.UserID, &ut.Active)
+	_, err := c.Database.Exec("UPDATE user_tokens SET active = false, updated_at = $1 WHERE user_id = $2 RETURNING id, token, user_id, active", ut.UpdatedAt, ut.UserID)
 	if err != nil {
 		return ut, err
 	}

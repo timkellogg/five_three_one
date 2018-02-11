@@ -36,8 +36,9 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	}
 
 	err = c.Database.
-		QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password, created_at) VALUES($1,$2,$3,$4) RETURNING email, active", u.Email, u.ObfuscatedID, u.EncryptedPassword, u.CreatedAt).
-		Scan(&u.Email, &u.Active)
+		QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password, created_at) VALUES($1,$2,$3,$4) RETURNING id, email, active",
+			u.Email, u.ObfuscatedID, u.EncryptedPassword, u.CreatedAt).
+		Scan(&u.ID, &u.Email, &u.Active)
 	if err != nil {
 		return "", err
 	}
@@ -73,13 +74,12 @@ func (u *User) FindByObfuscatedID(c *config.ApplicationContext, obfuscatedID str
 // FindByEmail - look up by email
 func (u *User) FindByEmail(c *config.ApplicationContext) (*User, error) {
 	err := c.Database.
-		QueryRow("SELECT email, active, encrypted_password, obfuscated_id FROM users WHERE email=$1", u.Email).
-		Scan(&u.Email, &u.Active, &u.EncryptedPassword, &u.ObfuscatedID)
+		QueryRow("SELECT id, email, active, encrypted_password, obfuscated_id FROM users WHERE email=$1", u.Email).
+		Scan(&u.ID, &u.Email, &u.Active, &u.EncryptedPassword, &u.ObfuscatedID)
 	if err != nil {
 		return u, err
 	}
 
-	fmt.Print(u.Email)
 	return u, nil
 }
 

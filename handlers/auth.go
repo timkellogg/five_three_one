@@ -55,6 +55,10 @@ func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 	}
 
 	ut := models.UserToken{Token: refreshToken, UserID: user.ID}
+
+	// Look for previous access tokens and invalidate
+	ut.Invalidate(c)
+
 	_, err = ut.Save(c)
 	if err != nil {
 		handleError(err, exceptions.RefreshTokenCreateError, w)
