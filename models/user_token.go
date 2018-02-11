@@ -34,7 +34,7 @@ func (ut *UserToken) Save(c *config.ApplicationContext) (*UserToken, error) {
 func (ut *UserToken) Invalidate(c *config.ApplicationContext) (*UserToken, error) {
 	ut.UpdatedAt = time.Now()
 
-	_, err := c.Database.Exec("UPDATE user_tokens SET active = false, updated_at = $1 WHERE user_id = $2 RETURNING id, token, user_id, active", ut.UpdatedAt, ut.UserID)
+	_, err := c.Database.Exec("UPDATE user_tokens SET active = false, updated_at = $1 WHERE user_id = $2", ut.UpdatedAt, ut.UserID)
 	if err != nil {
 		return ut, err
 	}
