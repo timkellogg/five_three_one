@@ -34,7 +34,7 @@ func TestLogin(t *testing.T) {
 		t.Error(err)
 	}
 
-	var response AuthResponse
+	var response LoginResponse
 	json.Unmarshal(body, &response)
 
 	if response.AccessToken == "" {

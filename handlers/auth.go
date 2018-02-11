@@ -10,8 +10,8 @@ import (
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
-// AuthResponse - structure of token response
-type AuthResponse struct {
+// LoginResponse - structure of login response
+type LoginResponse struct {
 	TokenType    string    `json:"token_type"`
 	AccessToken  string    `json:"access_token"`
 	ExpiresIn    time.Time `json:"expires_in"`
@@ -75,14 +75,14 @@ func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 	setCSRFToken(c, w, r)
 	setAuthorizationCookie(w, accessToken)
 
-	authResponse := AuthResponse{
+	LoginResponse := LoginResponse{
 		TokenType:    "bearer",
 		AccessToken:  accessToken,
 		ExpiresIn:    time.Now().Add(time.Hour * 72),
 		RefreshToken: refreshToken,
 	}
 
-	response, err := json.Marshal(authResponse)
+	response, err := json.Marshal(LoginResponse)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
