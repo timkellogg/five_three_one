@@ -43,6 +43,7 @@ func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 	}
 
 	valid = c.Auth.Decrypt(user.Password, user.EncryptedPassword)
+
 	if !valid {
 		handleError(err, exceptions.ResourceNotFoundError, w)
 		return

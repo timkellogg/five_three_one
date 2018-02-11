@@ -20,11 +20,12 @@ var context config.ApplicationContext
 var router *mux.Router
 var server *httptest.Server
 
-var testUser = models.User{Email: "test@test.com"}
+var testUser = models.User{Email: "test@test.com", Password: "password"}
 var routes = routing.Routes{
 	routing.Route{"Info", "GET", "/info", InfoShow},
 	routing.Route{"Users Create", "POST", "/users/create", UsersCreate},
 	routing.Route{"Users Show", "GET", "/users/me", UsersShow},
+	routing.Route{"Login", "POST", "/auth/login", Login},
 }
 
 // need server to be able to keep track of cookies
