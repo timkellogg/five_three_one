@@ -34,8 +34,9 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 		return "", err
 	}
 
-	err = c.Database.QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1,$2,$3) RETURNING id",
-		u.Email, u.ObfuscatedID, u.EncryptedPassword, u.Active).Scan(&u.ID)
+	err = c.Database.
+		QueryRow("INSERT INTO users (email, obfuscated_id, encrypted_password) VALUES($1,$2,$3) RETURNING email, active", u.Email, u.ObfuscatedID, u.EncryptedPassword).
+		Scan(&u.Email, &u.Active)
 	if err != nil {
 		return "", err
 	}
