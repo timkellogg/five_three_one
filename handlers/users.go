@@ -10,6 +10,15 @@ import (
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
+// UsersCreateResponse - json returned from users create handler
+type UsersCreateResponse struct {
+	Active       bool   `json:"active"`
+	Email        string `json:"email"`
+	ObfuscatedID string `json:"id"`
+}
+
+// Users
+
 // UsersCreate - create an application user
 func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var (
@@ -36,20 +45,25 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 	expiration := time.Now().Add(24 * time.Hour)
 	authorizationCookie := http.Cookie{
 		Name:    "Authorization",
-		Value:   token,
+		Value:   "Bearer " + token,
 		Expires: expiration,
 	}
+	http.SetCookie(w, &authorizationCookie)
 
-	serializedUser, err := u.SerializedUser(c)
+	responseStructure := UsersCreateResponse{
+		Active:       u.Active,
+		Email:        u.Email,
+		ObfuscatedID: u.ObfuscatedID,
+	}
+
+	response, err := json.Marshal(responseStructure)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 
-	http.SetCookie(w, &authorizationCookie)
-
 	w.WriteHeader(http.StatusCreated)
-	w.Write(serializedUser)
+	w.Write(response)
 }
 
 // UsersShow - return customer details

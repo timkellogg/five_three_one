@@ -10,13 +10,16 @@ import (
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
-// LoginResponse - structure of login response
-type LoginResponse struct {
+// AuthorizeReponse - structure of login response
+type AuthorizeReponse struct {
 	TokenType    string    `json:"token_type"`
 	AccessToken  string    `json:"access_token"`
 	ExpiresIn    time.Time `json:"expires_in"`
 	RefreshToken string    `json:"refresh_token"`
 }
+
+// TokenResponse - structure of token response
+type TokenResponse struct{}
 
 // Login - refreshes tokens
 func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
@@ -75,14 +78,14 @@ func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 	setCSRFToken(c, w, r)
 	setAuthorizationCookie(w, accessToken)
 
-	LoginResponse := LoginResponse{
+	AuthorizeReponse := AuthorizeReponse{
 		TokenType:    "bearer",
 		AccessToken:  accessToken,
 		ExpiresIn:    time.Now().Add(time.Hour * 72),
 		RefreshToken: refreshToken,
 	}
 
-	response, err := json.Marshal(LoginResponse)
+	response, err := json.Marshal(AuthorizeReponse)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
@@ -90,4 +93,14 @@ func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(response)
+}
+
+// Token - get new access token with refresh token
+func Token(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+
+}
+
+// Confirm -
+func Confirm(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+
 }

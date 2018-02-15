@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -19,18 +20,28 @@ func TestUsersCreate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if res.StatusCode != 201 {
-		t.Errorf("Success status expected but instead got: %d", res.StatusCode)
-	}
-
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		t.Error(err)
 	}
 
-	returnedResponse := string(body)
-	if returnedResponse == "" {
-		t.Error("Response was empty")
+	var response UsersCreateResponse
+	json.Unmarshal(body, &response)
+
+	if res.StatusCode != 201 {
+		t.Errorf("Success status expected but instead got: %d", res.StatusCode)
+	}
+
+	if response.Active != true {
+		t.Errorf("Expected active to be true but was: %v", response.Active)
+	}
+
+	if response.Email != "test@test.com" {
+		t.Errorf("Expected email to be test@test.com but was: %v", response.Email)
+	}
+
+	if response.ObfuscatedID == "" {
+		t.Error("Expected obfuscated_id to be set but was empty")
 	}
 }
 
@@ -41,7 +52,7 @@ func TestUsersShow(t *testing.T) {
 
 	_, err := testUser.CreateUser(&context)
 	if err != nil {
-		t.Errorf("HERE: %v", err)
+		t.Error(err)
 	}
 
 	res, err := http.Get(url)
