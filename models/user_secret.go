@@ -19,8 +19,8 @@ type UserSecret struct {
 	UpdatedAt    pq.NullTime `json:"updated_at" db:"updated_at"`
 }
 
-// SaveUserSecret - persists the user secret
-func (us *UserSecret) SaveUserSecret(c *config.ApplicationContext) (*UserSecret, error) {
+// CreateUserSecret - persists the user secret
+func (us *UserSecret) CreateUserSecret(c *config.ApplicationContext) (*UserSecret, error) {
 	us.ClientSecret = c.Auth.UniqueString()
 	us.ClientID = c.Auth.UniqueString()
 	us.Active = true

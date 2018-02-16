@@ -2,14 +2,14 @@ package models
 
 import "testing"
 
-func TestSaveUserSecret(t *testing.T) {
+func TestCreateUserSecret(t *testing.T) {
 	defer context.TruncateDBTables()
 
 	testUser.CreateUser(&context)
 
 	userSecret := UserSecret{UserID: testUser.ID}
 
-	returnedUserSecret, err := userSecret.SaveUserSecret(&context)
+	returnedUserSecret, err := userSecret.CreateUserSecret(&context)
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,7 +29,7 @@ func TestUserSecretUser(t *testing.T) {
 
 	userSecret := UserSecret{UserID: testUser.ID}
 
-	returnedUserSecret, err := userSecret.SaveUserSecret(&context)
+	returnedUserSecret, err := userSecret.CreateUserSecret(&context)
 	if err != nil {
 		t.Error(err)
 	}

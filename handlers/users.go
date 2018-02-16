@@ -12,17 +12,18 @@ import (
 
 // UsersCreateResponse - json returned from users create handler
 type UsersCreateResponse struct {
-	Active       bool   `json:"active"`
-	Email        string `json:"email"`
 	ObfuscatedID string `json:"id"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	Email        string `json:"email"`
+	Active       bool   `json:"active"`
 }
-
-// Users
 
 // UsersCreate - create an application user
 func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var (
 		u     models.User
+		us    models.UserSecret
 		err   error
 		token string
 	)
@@ -36,7 +37,22 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// Needs to return user
 	token, err = u.CreateUser(c)
+	if err != nil {
+		handleError(err, exceptions.UserCreateError, w)
+		return
+	}
+
+	user, err := u.FindByEmail(c)
+	if err != nil {
+		handleError(err, exceptions.UserCreateError, w)
+		return
+	}
+
+	us.UserID = user.ID
+
+	userSecret, err := us.CreateUserSecret(c)
 	if err != nil {
 		handleError(err, exceptions.UserCreateError, w)
 		return
@@ -54,6 +70,8 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		Active:       u.Active,
 		Email:        u.Email,
 		ObfuscatedID: u.ObfuscatedID,
+		ClientID:     userSecret.ClientID,
+		ClientSecret: userSecret.ClientSecret,
 	}
 
 	response, err := json.Marshal(responseStructure)
