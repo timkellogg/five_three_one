@@ -22,10 +22,10 @@ var server *httptest.Server
 
 var testUser = models.User{Email: "test@test.com", Password: "password"}
 var routes = routing.Routes{
-	routing.Route{"Info", "GET", "/info", InfoShow},
-	routing.Route{"Users Create", "POST", "/users/create", UsersCreate},
-	routing.Route{"Users Show", "GET", "/users/me", UsersShow},
-	routing.Route{"Login", "POST", "/auth/login", Login},
+	routing.Route{Name: "Info", Method: "GET", Pattern: "/info", HandlerFunc: InfoShow},
+	routing.Route{Name: "Users Create", Method: "POST", Pattern: "/users/create", HandlerFunc: UsersCreate},
+	routing.Route{Name: "Users Show", Method: "GET", Pattern: "/users/me", HandlerFunc: UsersShow},
+	routing.Route{Name: "Authorize", Method: "POST", Pattern: "/oauth/authorize", HandlerFunc: Authorize},
 }
 
 // need server to be able to keep track of cookies

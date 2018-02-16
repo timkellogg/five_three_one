@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestLogin(t *testing.T) {
+func TestAuthorize(t *testing.T) {
 	defer context.TruncateDBTables()
 
 	_, err := testUser.CreateUser(&context)

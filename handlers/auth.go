@@ -21,8 +21,8 @@ type AuthorizeReponse struct {
 // TokenResponse - structure of token response
 type TokenResponse struct{}
 
-// Login - refreshes tokens
-func Login(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+// Authorize - grants access
+func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var (
 		user  *models.User
 		u     models.User
