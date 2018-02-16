@@ -16,7 +16,7 @@ func TestAuthorize(t *testing.T) {
 		t.Error(err)
 	}
 
-	url := server.URL + "/api/auth/login"
+	url := server.URL + "/api/oauth/authorize"
 	payload := `{"email": "test@test.com", "password": "password"}`
 	reader := strings.NewReader(payload)
 
