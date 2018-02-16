@@ -6,19 +6,21 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/lib/pq"
+
 	"github.com/timkellogg/five_three_one/config"
 )
 
 // User - a consumer of the application
 type User struct {
 	ID                int64
-	ObfuscatedID      string    `json:"obfuscated_id" db:"obfuscated_id"`
-	Email             string    `json:"email" db:"email"`
-	Password          string    `json:"password" db:"-"`
-	EncryptedPassword string    `json:"-" db:"encrypted_password"`
-	Active            bool      `json:"active" db:"active"`
-	CreatedAt         time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
+	ObfuscatedID      string      `json:"obfuscated_id" db:"obfuscated_id"`
+	Email             string      `json:"email" db:"email"`
+	Password          string      `json:"password" db:"-"`
+	EncryptedPassword string      `json:"-" db:"encrypted_password"`
+	Active            bool        `json:"active" db:"active"`
+	CreatedAt         pq.NullTime `json:"created_at" db:"created_at"`
+	UpdatedAt         pq.NullTime `json:"updated_at" db:"updated_at"`
 }
 
 // CreateUser - saves user to db
@@ -29,7 +31,7 @@ func (u *User) CreateUser(c *config.ApplicationContext) (string, error) {
 	u.ObfuscatedID = createObfuscatedID()
 	u.EncryptedPassword, err = c.Auth.Encrypt(u.Password)
 	u.Active = true
-	u.CreatedAt = time.Now()
+	u.CreatedAt = pq.NullTime{Valid: true, Time: time.Now()}
 
 	if err != nil {
 		return "", err

@@ -3,6 +3,8 @@ package models
 import (
 	"testing"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 func TestUsersCreate(t *testing.T) {
@@ -49,8 +51,8 @@ func TestSerializedUser(t *testing.T) {
 		ObfuscatedID:      "some-string",
 		Password:          "password",
 		EncryptedPassword: "a90ahind",
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		CreatedAt:         pq.NullTime{Valid: true, Time: time.Now()},
+		UpdatedAt:         pq.NullTime{Valid: true, Time: time.Now()},
 		Active:            true,
 	}
 
