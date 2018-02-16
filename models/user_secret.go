@@ -3,26 +3,28 @@ package models
 import (
 	"time"
 
+	"github.com/lib/pq"
+
 	"github.com/timkellogg/five_three_one/config"
 )
 
 // UserSecret - stores client_id and client_secret for auth
 type UserSecret struct {
 	ID           int64
-	UserID       int64     `json:"user_id" db:"user_id"`
-	ClientID     string    `json:"client_id" db:"client_id"`
-	ClientSecret string    `json:"client_secret" db:"client_secret"`
-	Active       bool      `json:"active" db:"active"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	UserID       int64       `json:"user_id" db:"user_id"`
+	ClientID     string      `json:"client_id" db:"client_id"`
+	ClientSecret string      `json:"client_secret" db:"client_secret"`
+	Active       bool        `json:"active" db:"active"`
+	CreatedAt    pq.NullTime `json:"created_at" db:"created_at"`
+	UpdatedAt    pq.NullTime `json:"updated_at" db:"updated_at"`
 }
 
-// Save - persists the user secret
+// SaveUserSecret - persists the user secret
 func (us *UserSecret) SaveUserSecret(c *config.ApplicationContext) (*UserSecret, error) {
 	us.ClientSecret = c.Auth.UniqueString()
 	us.ClientID = c.Auth.UniqueString()
 	us.Active = true
-	us.CreatedAt = time.Now()
+	us.CreatedAt = pq.NullTime{Valid: true, Time: time.Now()}
 
 	err := c.Database.
 		QueryRow("INSERT INTO user_secrets (user_id, client_id, client_secret, active, created_at) VALUES($1,$2,$3,$4,$5) RETURNING *",
@@ -35,7 +37,16 @@ func (us *UserSecret) SaveUserSecret(c *config.ApplicationContext) (*UserSecret,
 	return us, nil
 }
 
-// User - returns UserSecret user
-func (us *UserSecret) User(c *config.ApplicationContext) (User, error) {
-	return User{}, nil
+// UserSecretUser - returns UserSecret user
+func (us *UserSecret) UserSecretUser(c *config.ApplicationContext) (*User, error) {
+	var user User
+
+	err := c.Database.
+		QueryRow("SELECT obfuscated_id, email, active, created_at FROM users WHERE id = $1", us.UserID).
+		Scan(&user.ObfuscatedID, &user.Email, &user.Active, &user.CreatedAt)
+	if err != nil {
+		return &user, err
+	}
+
+	return &user, nil
 }

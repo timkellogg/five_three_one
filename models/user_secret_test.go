@@ -3,6 +3,8 @@ package models
 import "testing"
 
 func TestSaveUserSecret(t *testing.T) {
+	defer context.TruncateDBTables()
+
 	testUser.CreateUser(&context)
 
 	userSecret := UserSecret{UserID: testUser.ID}
@@ -20,5 +22,24 @@ func TestSaveUserSecret(t *testing.T) {
 		t.Error("UserSecret did not set client secret")
 	}
 }
-func TestUser(t *testing.T) {
+func TestUserSecretUser(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	testUser.CreateUser(&context)
+
+	userSecret := UserSecret{UserID: testUser.ID}
+
+	returnedUserSecret, err := userSecret.SaveUserSecret(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	returnedUser, err := returnedUserSecret.UserSecretUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if returnedUser.Email != testUser.Email {
+		t.Error("Could not retrieve user from user secret")
+	}
 }
