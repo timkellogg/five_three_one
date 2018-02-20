@@ -15,10 +15,9 @@ func TestAuthService(t *testing.T) {
 		err           error
 		returnedToken string
 	)
+	id := "1"
 
-	email, id := "test@test.com", "1"
-
-	token, err := auth.CreateToken(email, id)
+	token, err := auth.CreateToken(id)
 	if err != nil {
 		t.Errorf("AuthService failed to create a token: %v", err)
 	}

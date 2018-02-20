@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -20,29 +21,25 @@ type AuthorizeReponse struct {
 
 // Authorize - grants access
 func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var (
-		user  *models.User
-		u     models.User
-		err   error
-		valid bool
-	)
-
-	decoder := json.NewDecoder(r.Body)
+	var u models.User
 	defer r.Body.Close()
 
-	err = decoder.Decode(&u)
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&u)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 
-	user, err = u.FindByEmail(c)
+	user, err := u.FindByEmail(c)
 	if err != nil {
 		handleError(err, exceptions.ResourceNotFoundError, w)
 		return
 	}
 
-	valid = c.Auth.Decrypt(user.Password, user.EncryptedPassword)
+	valid := c.Auth.Decrypt(u.Password, user.EncryptedPassword)
+	fmt.Printf("password %v", u.Password)
+	fmt.Printf("encyptedPass %v", u.EncryptedPassword)
 
 	if !valid {
 		handleError(err, exceptions.ResourceNotFoundError, w)
@@ -66,14 +63,14 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	accessToken, err := c.Auth.CreateToken(u.Email, u.ObfuscatedID)
+	accessToken, err := c.Auth.CreateToken(u.ObfuscatedID)
 	if err != nil {
 		handleError(err, exceptions.TokenCreateError, w)
 		return
 	}
 
 	setCSRFToken(c, w, r)
-	setAuthorizationCookie(w, accessToken)
+	setAuthorizationCookie(c, w, user)
 
 	AuthorizeReponse := AuthorizeReponse{
 		TokenType:    "bearer",

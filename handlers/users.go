@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/models"
@@ -21,55 +20,35 @@ type UsersResponse struct {
 
 // UsersCreate - create an application user
 func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var (
-		u     models.User
-		us    models.UserSecret
-		err   error
-		token string
-	)
-
-	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 
-	err = decoder.Decode(&u)
+	var u models.User
+	var us models.UserSecret
+
+	decoder := json.NewDecoder(r.Body)
+
+	err := decoder.Decode(&u)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 
-	// Needs to return user
-	token, err = u.CreateUser(c)
+	// create user
+	user, err := u.CreateUser(c)
 	if err != nil {
 		handleError(err, exceptions.UserCreateError, w)
 		return
 	}
 
-	user, err := u.FindByEmail(c)
-	if err != nil {
-		handleError(err, exceptions.UserCreateError, w)
-		return
-	}
-
-	us.UserID = user.ID
-
+	// create user secret
 	userSecret, err := us.CreateUserSecret(c)
 	if err != nil {
 		handleError(err, exceptions.UserCreateError, w)
 		return
 	}
 
-	// token, err = c.Auth.CreateToken(u.Email, u.ObfuscatedID)
-	// if err != nil {
-	// 	return u, err
-	// }
-
-	expiration := time.Now().Add(24 * time.Hour)
-	authorizationCookie := http.Cookie{
-		Name:    "Authorization",
-		Value:   "Bearer " + token,
-		Expires: expiration,
-	}
-	http.SetCookie(w, &authorizationCookie)
+	// set auth
+	setAuthorizationCookie(c, w, user)
 
 	responseStructure := UsersResponse{
 		Active:       u.Active,
@@ -91,18 +70,15 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 
 // UsersShow - return customer details
 func UsersShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var u models.User
 	var us models.UserSecret
+	var err error
 
-	obfuscatedID := requireAuthorization(c, w, r)
-
-	returnedUser, err := u.FindByObfuscatedID(c, obfuscatedID)
+	user, err := userFromAuthorizationHeader(c, w, r)
 	if err != nil {
 		handleError(err, exceptions.UserNotAuthorized, w)
 		return
 	}
 
-	us.UserID = returnedUser.ID
 	userSecret, err := us.UserSecretFindByID(c)
 	if err != nil {
 		handleError(err, exceptions.ResourceNotFoundError, w)
@@ -110,9 +86,9 @@ func UsersShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	responseStructure := UsersResponse{
-		Active:       u.Active,
-		Email:        u.Email,
-		ObfuscatedID: u.ObfuscatedID,
+		Active:       user.Active,
+		Email:        user.Email,
+		ObfuscatedID: user.ObfuscatedID,
 		ClientID:     userSecret.ClientID,
 		ClientSecret: userSecret.ClientSecret,
 	}

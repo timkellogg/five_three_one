@@ -1,29 +1,39 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/timkellogg/five_three_one/config"
+	"github.com/timkellogg/five_three_one/models"
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
-// requireAuthentication - verifies user based upon access token
-func requireAuthorization(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) string {
+// userFromAuthorizationHeader - verifies user based upon access token
+func userFromAuthorizationHeader(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) (*models.User, error) {
+	var u models.User
+
 	token := r.Header.Get("Authorization")
 
 	if token == "" {
-		handleError(nil, exceptions.UserNotAuthorized, w)
-		return ""
+		return &u, errors.New("Authorization Token was empty")
 	}
 
+	// verify token
 	obfuscatedID, valid := c.Auth.VerifyToken(token)
 	if !valid {
-		handleError(nil, exceptions.UserNotAuthorized, w)
-		return ""
+		return &u, errors.New("Authorization Token was unable to be verified")
 	}
 
-	return obfuscatedID
+	// find user
+	u.ObfuscatedID = obfuscatedID
+	user, err := u.FindByObfuscatedID(c)
+	if err != nil {
+		return &u, errors.New("Authorization Token was unable to be verified")
+	}
+
+	return user, nil
 }
 
 // setCSRFToken - creates a new CSRF token and passes that into the request header
@@ -32,7 +42,13 @@ func setCSRFToken(c *config.ApplicationContext, w http.ResponseWriter, r *http.R
 }
 
 // setAuthorization - adds Authorization header with bearer token
-func setAuthorizationCookie(w http.ResponseWriter, token string) {
+func setAuthorizationCookie(c *config.ApplicationContext, w http.ResponseWriter, u *models.User) {
+	token, err := c.Auth.CreateToken(u.ObfuscatedID)
+	if err != nil {
+		handleError(err, exceptions.UserCreateError, w)
+		return
+	}
+
 	authorizationCookie := http.Cookie{
 		Name:    "Authorization",
 		Value:   token,

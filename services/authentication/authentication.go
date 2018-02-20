@@ -15,9 +15,9 @@ import (
 type AuthService struct{}
 
 // CreateToken - signs and encrypts auth token
-func (a *AuthService) CreateToken(email, id string) (string, error) {
+func (a *AuthService) CreateToken(id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims = buildAccessTokenClaims(email, id)
+	token.Claims = buildAccessTokenClaims(id)
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("AUTH_SECRET")))
 	if err != nil {
@@ -84,7 +84,7 @@ func getKey(t *jwt.Token) (interface{}, error) {
 }
 
 // buildAccessTokenClaims - creates short-lived "access token" claims for full auth
-func buildAccessTokenClaims(email, id string) jwt.Claims {
+func buildAccessTokenClaims(id string) jwt.Claims {
 	var expireToken time.Duration
 
 	expireToken, err := time.ParseDuration(os.Getenv("AUTH_EXP"))
@@ -94,7 +94,6 @@ func buildAccessTokenClaims(email, id string) jwt.Claims {
 
 	claims := make(jwt.MapClaims)
 
-	claims["email"] = email
 	claims["user_id"] = id
 	claims["exp"] = time.Now().Add(time.Hour * expireToken).Unix()
 	claims["iat"] = time.Now().Unix()
