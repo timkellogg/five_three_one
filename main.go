@@ -21,7 +21,7 @@ var routes = routing.Routes{
 	routing.Route{Name: "Info", Method: "GET", Pattern: "/info", HandlerFunc: handlers.InfoShow},
 	routing.Route{Name: "Users Create", Method: "POST", Pattern: "/users/create", HandlerFunc: handlers.UsersCreate},
 	routing.Route{Name: "Users Show", Method: "GET", Pattern: "/users/me", HandlerFunc: handlers.UsersShow},
-	routing.Route{Name: "Authorize", Method: "POST", Pattern: "/oauth/login", HandlerFunc: handlers.Authorize},
+	routing.Route{Name: "Authorize", Method: "POST", Pattern: "/oauth/authorize", HandlerFunc: handlers.Authorize},
 	routing.Route{Name: "Token", Method: "POST", Pattern: "/oauth/token", HandlerFunc: handlers.Token},
 }
 

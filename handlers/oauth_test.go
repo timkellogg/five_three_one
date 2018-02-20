@@ -45,3 +45,15 @@ func TestAuthorize(t *testing.T) {
 		t.Error("Expected refresh token to be defined but was empty")
 	}
 }
+
+func TestToken(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	// check client secret
+
+	// check client id
+
+	// check refresh token valid
+
+	// return response
+}

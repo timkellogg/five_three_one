@@ -18,9 +18,6 @@ type AuthorizeReponse struct {
 	RefreshToken string    `json:"refresh_token"`
 }
 
-// TokenResponse - structure of token response
-type TokenResponse struct{}
-
 // Authorize - grants access
 func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var (
@@ -97,7 +94,17 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 
 // Token - get new access token with refresh token
 func Token(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
+	var err error
+	var u models.User
 
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	err = decoder.Decode(&u)
+	if err != nil {
+		handleError(err, exceptions.JSONParseError, w)
+		return
+	}
 }
 
 // Confirm -

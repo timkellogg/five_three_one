@@ -47,3 +47,9 @@ func TestMain(m *testing.M) {
 	runTests := m.Run()
 	os.Exit(runTests)
 }
+
+func SetAuthorized() {
+	//
+
+	//
+}

@@ -25,7 +25,7 @@ func TestUsersCreate(t *testing.T) {
 		t.Error(err)
 	}
 
-	var response UsersCreateResponse
+	var response UsersResponse
 	json.Unmarshal(body, &response)
 
 	if res.StatusCode != 201 {
@@ -60,7 +60,23 @@ func TestUsersShow(t *testing.T) {
 		t.Error(err)
 	}
 
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var response UsersResponse
+	json.Unmarshal(body, &response)
+
 	if res.StatusCode != 200 {
 		t.Errorf("Expected status 200 but received %d", res.StatusCode)
+	}
+
+	if response.Active != true {
+		t.Errorf("Expected response to be active but was %v", response.Active)
+	}
+
+	if response.Email != "test@test.com" {
+		t.Errorf("Expected email to be test@test.com but was: %v", response.Email)
 	}
 }

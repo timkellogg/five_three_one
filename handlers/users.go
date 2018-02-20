@@ -10,8 +10,8 @@ import (
 	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
-// UsersCreateResponse - json returned from users create handler
-type UsersCreateResponse struct {
+// UsersResponse - json returned from users handlers
+type UsersResponse struct {
 	ObfuscatedID string `json:"id"`
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
@@ -58,6 +58,11 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// token, err = c.Auth.CreateToken(u.Email, u.ObfuscatedID)
+	// if err != nil {
+	// 	return u, err
+	// }
+
 	expiration := time.Now().Add(24 * time.Hour)
 	authorizationCookie := http.Cookie{
 		Name:    "Authorization",
@@ -66,7 +71,7 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 	}
 	http.SetCookie(w, &authorizationCookie)
 
-	responseStructure := UsersCreateResponse{
+	responseStructure := UsersResponse{
 		Active:       u.Active,
 		Email:        u.Email,
 		ObfuscatedID: u.ObfuscatedID,
@@ -87,20 +92,37 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 // UsersShow - return customer details
 func UsersShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var u models.User
+	var us models.UserSecret
 
 	obfuscatedID := requireAuthorization(c, w, r)
 
 	returnedUser, err := u.FindByObfuscatedID(c, obfuscatedID)
 	if err != nil {
 		handleError(err, exceptions.UserNotAuthorized, w)
+		return
 	}
 
-	serializedUser, err := returnedUser.SerializedUser(c)
+	us.UserID = returnedUser.ID
+	userSecret, err := us.UserSecretFindByID(c)
+	if err != nil {
+		handleError(err, exceptions.ResourceNotFoundError, w)
+		return
+	}
+
+	responseStructure := UsersResponse{
+		Active:       u.Active,
+		Email:        u.Email,
+		ObfuscatedID: u.ObfuscatedID,
+		ClientID:     userSecret.ClientID,
+		ClientSecret: userSecret.ClientSecret,
+	}
+
+	response, err := json.Marshal(responseStructure)
 	if err != nil {
 		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(serializedUser)
+	w.Write(response)
 }

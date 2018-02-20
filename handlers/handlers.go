@@ -11,6 +11,7 @@ import (
 // requireAuthentication - verifies user based upon access token
 func requireAuthorization(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) string {
 	token := r.Header.Get("Authorization")
+
 	if token == "" {
 		handleError(nil, exceptions.UserNotAuthorized, w)
 		return ""
