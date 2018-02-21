@@ -12,7 +12,7 @@ func TestSave(t *testing.T) {
 		UserID: 1,
 	}
 
-	returnedUserToken, err := userToken.Save(&context)
+	returnedUserToken, err := userToken.UserTokenCreate(&context)
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,33 +26,54 @@ func TestSave(t *testing.T) {
 		UserID: 1,
 	}
 
-	_, err = userToken2.Save(&context)
+	_, err = userToken2.UserTokenCreate(&context)
 	if err == nil {
 		t.Error("Token violated active uniqueness constraint")
 	}
 }
 
-// func TestInvalidate(t *testing.T) {
-// 	defer context.TruncateDBTables()
+func TestInvalidate(t *testing.T) {
+	defer context.TruncateDBTables()
 
-// 	userToken := UserToken{
-// 		Token:  "token",
-// 		UserID: 1,
-// 	}
+	userToken := UserToken{
+		Token:  "token",
+		UserID: 1,
+	}
 
-// 	token, err := userToken.Save(&context)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	token, err := userToken.UserTokenCreate(&context)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	token, err = userToken.Invalidate(&context)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
+	token, err = userToken.UserTokenInvalidate(&context)
+	if err != nil {
+		t.Error(err)
+	}
 
-// 	// err = context.Database.QueryRow("SELECT * FROM user_tokens RETURNING *").Scan(&token.Active)
+	if token.Active != false {
+		t.Errorf("Expected user token active to be false but was %v", token.Active)
+	}
+}
 
-// 	if token.Active != false {
-// 		t.Errorf("Expected user token active to be false but was %v", token.Active)
-// 	}
-// }
+func TestUserTokenUser(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	user, err := testUser.CreateUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	userToken := UserToken{
+		Token:  "token",
+		UserID: user.ID,
+	}
+
+	tokenUser, err := userToken.UserTokenCreate(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if tokenUser.UserID != user.ID {
+		t.Error("UserTokenUser was unable to return user")
+	}
+}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -38,8 +37,6 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	valid := c.Auth.Decrypt(u.Password, user.EncryptedPassword)
-	fmt.Printf("password %v", u.Password)
-	fmt.Printf("encyptedPass %v", u.EncryptedPassword)
 
 	if !valid {
 		handleError(err, exceptions.ResourceNotFoundError, w)
@@ -55,9 +52,9 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 	ut := models.UserToken{Token: refreshToken, UserID: user.ID}
 
 	// Look for previous access tokens and invalidate
-	ut.Invalidate(c)
+	ut.UserTokenInvalidate(c)
 
-	_, err = ut.Save(c)
+	_, err = ut.UserTokenCreate(c)
 	if err != nil {
 		handleError(err, exceptions.RefreshTokenCreateError, w)
 		return
@@ -93,6 +90,7 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 func Token(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var err error
 	var u models.User
+	var ut models.UserToken
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
@@ -102,6 +100,13 @@ func Token(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request)
 		handleError(err, exceptions.JSONParseError, w)
 		return
 	}
+
+	user, err := userFromAuthorizationHeader(c, w, r)
+	if err != nil {
+		handleError(err, exceptions.UserNotAuthorized, w)
+		return
+	}
+
 }
 
 // Confirm -
