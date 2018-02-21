@@ -61,3 +61,17 @@ func (u *User) FindByEmail(c *config.ApplicationContext) (*User, error) {
 
 	return u, nil
 }
+
+// UserActiveToken - find active refresh token for user
+func (u *User) UserActiveToken(c *config.ApplicationContext) (*UserToken, error) {
+	var userToken UserToken
+
+	err := c.Database.
+		QueryRow("SELECT id, token, user_id, active, created_at, updated_at FROM user_tokens WHERE user_id = $1 AND active = true LIMIT 1", u.ID).
+		Scan(&userToken.ID, &userToken.Token, &userToken.UserID, &userToken.Active, &userToken.CreatedAt, &userToken.UpdatedAt)
+	if err != nil {
+		return &userToken, err
+	}
+
+	return &userToken, nil
+}

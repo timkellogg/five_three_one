@@ -48,3 +48,35 @@ func TestUsersFindByObfuscatedID(t *testing.T) {
 		t.Errorf("Could not find user: %v", returnedUser.ObfuscatedID)
 	}
 }
+
+func TestUserActiveToken(t *testing.T) {
+	defer context.TruncateDBTables()
+
+	user, err := testUser.CreateUser(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = user.UserActiveToken(&context)
+	if err == nil {
+		t.Errorf("Expected UserActiveToken to be empty. %v", err)
+	}
+
+	userToken := UserToken{
+		Token:  "token",
+		UserID: 1,
+	}
+
+	returnedUserToken, err := userToken.UserTokenCreate(&context)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if returnedUserToken.Active != true {
+		t.Error("Expected user token to be active but was inactive")
+	}
+
+	if returnedUserToken.Token == "" {
+		t.Error("Expected user token to have an active token but was empty")
+	}
+}
