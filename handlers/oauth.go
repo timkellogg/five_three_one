@@ -18,6 +18,14 @@ type AuthorizeReponse struct {
 	RefreshToken string    `json:"refresh_token"`
 }
 
+// TokenRequest - parameters from request call
+type TokenRequest struct {
+	GrantType    string `json:"grant_type"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 // Authorize - grants access
 func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
 	var u models.User
@@ -67,7 +75,7 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 	}
 
 	setCSRFToken(c, w, r)
-	setAuthorizationCookie(c, w, user)
+	setAuthorizationCookie(c, w, accessToken)
 
 	AuthorizeReponse := AuthorizeReponse{
 		TokenType:    "bearer",
@@ -88,25 +96,76 @@ func Authorize(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 
 // Token - get new access token with refresh token
 func Token(c *config.ApplicationContext, w http.ResponseWriter, r *http.Request) {
-	var err error
-	var u models.User
-	var ut models.UserToken
-
-	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 
-	err = decoder.Decode(&u)
-	if err != nil {
-		handleError(err, exceptions.JSONParseError, w)
+	var (
+		u   models.User
+		us  models.UserSecret
+		req TokenRequest
+	)
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&req)
+
+	if req.GrantType != "refresh_token" {
+		handleError(err, exceptions.UnknownTokenGrantType, w)
 		return
 	}
 
+	// find user from auth header
 	user, err := userFromAuthorizationHeader(c, w, r)
 	if err != nil {
 		handleError(err, exceptions.UserNotAuthorized, w)
 		return
 	}
 
+	us.UserID = user.ID
+
+	// find user secret
+	userSecret, err := us.UserSecretFindByID(c)
+	if err != nil {
+		handleError(err, exceptions.ResourceNotFoundError, w)
+		return
+	}
+
+	// validate credentials
+	if userSecret.ClientID != req.ClientID || userSecret.ClientSecret != req.ClientSecret {
+		handleError(err, exceptions.UserNotAuthorized, w)
+		return
+	}
+
+	// find active refresh token
+	refreshToken, err := user.UserActiveToken(c)
+	if err != nil {
+		handleError(err, exceptions.UserNotAuthorized, w)
+		return
+	}
+
+	// create new access token
+	accessToken, err := c.Auth.CreateToken(u.ObfuscatedID)
+	if err != nil {
+		handleError(err, exceptions.TokenCreateError, w)
+		return
+	}
+
+	setCSRFToken(c, w, r)
+	setAuthorizationCookie(c, w, accessToken)
+
+	AuthorizeReponse := AuthorizeReponse{
+		TokenType:    "bearer",
+		AccessToken:  accessToken,
+		ExpiresIn:    time.Now().Add(time.Hour * 72),
+		RefreshToken: refreshToken.Token,
+	}
+
+	response, err := json.Marshal(AuthorizeReponse)
+	if err != nil {
+		handleError(err, exceptions.JSONParseError, w)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
 }
 
 // Confirm -

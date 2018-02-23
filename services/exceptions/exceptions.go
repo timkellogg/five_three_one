@@ -62,6 +62,13 @@ var RefreshTokenCreateError = ApplicationException{
 	HTTPStatus: http.StatusInternalServerError,
 }
 
+// UnknownTokenGrantType - grant type of oauth not recognized
+var UnknownTokenGrantType = ApplicationException{
+	Code:       "GrantTypeNotRecognized",
+	Message:    "Grant type is not recognized",
+	HTTPStatus: http.StatusUnprocessableEntity,
+}
+
 func handleError(e error, appError ApplicationException, w http.ResponseWriter) {
 	log.Println(e)
 	log.Println(appError.Code)

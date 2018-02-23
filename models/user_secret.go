@@ -53,14 +53,12 @@ func (us *UserSecret) UserSecretUser(c *config.ApplicationContext) (*User, error
 
 // UserSecretFindByID - returns UserSecret by ID
 func (us *UserSecret) UserSecretFindByID(c *config.ApplicationContext) (*UserSecret, error) {
-	var userSecret UserSecret
-
 	err := c.Database.
 		QueryRow("SELECT client_id, client_secret FROM user_secrets WHERE user_id = $1 AND active = true", us.UserID).
-		Scan(&userSecret.ClientID, &userSecret.ClientSecret)
+		Scan(&us.ClientID, &us.ClientSecret)
 	if err != nil {
-		return &userSecret, err
+		return us, err
 	}
 
-	return &userSecret, nil
+	return us, nil
 }

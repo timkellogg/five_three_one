@@ -40,6 +40,8 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	us.UserID = user.ID
+
 	// create user secret
 	userSecret, err := us.CreateUserSecret(c)
 	if err != nil {
@@ -47,8 +49,15 @@ func UsersCreate(c *config.ApplicationContext, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// create new access token
+	accessToken, err := c.Auth.CreateToken(u.ObfuscatedID)
+	if err != nil {
+		handleError(err, exceptions.TokenCreateError, w)
+		return
+	}
+
 	// set auth
-	setAuthorizationCookie(c, w, user)
+	setAuthorizationCookie(c, w, accessToken)
 
 	responseStructure := UsersResponse{
 		Active:       u.Active,
@@ -79,6 +88,7 @@ func UsersShow(c *config.ApplicationContext, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	us = models.UserSecret{UserID: user.ID}
 	userSecret, err := us.UserSecretFindByID(c)
 	if err != nil {
 		handleError(err, exceptions.ResourceNotFoundError, w)

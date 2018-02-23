@@ -7,7 +7,6 @@ import (
 
 	"github.com/timkellogg/five_three_one/config"
 	"github.com/timkellogg/five_three_one/models"
-	"github.com/timkellogg/five_three_one/services/exceptions"
 )
 
 // userFromAuthorizationHeader - verifies user based upon access token
@@ -42,13 +41,7 @@ func setCSRFToken(c *config.ApplicationContext, w http.ResponseWriter, r *http.R
 }
 
 // setAuthorization - adds Authorization header with bearer token
-func setAuthorizationCookie(c *config.ApplicationContext, w http.ResponseWriter, u *models.User) {
-	token, err := c.Auth.CreateToken(u.ObfuscatedID)
-	if err != nil {
-		handleError(err, exceptions.UserCreateError, w)
-		return
-	}
-
+func setAuthorizationCookie(c *config.ApplicationContext, w http.ResponseWriter, token string) {
 	authorizationCookie := http.Cookie{
 		Name:    "Authorization",
 		Value:   token,
